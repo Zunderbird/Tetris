@@ -1,0 +1,74 @@
+{
+  "shapes": [
+    {
+      "name": "T",
+      "type": "simple",
+	  "coordinates": [
+		[0, 0],
+		[1, 0],
+		[2, 0],
+		[1, 1]
+		]
+    },    
+	{
+      "name": "Q",
+      "type": "simple",
+	  "coordinates": [
+		[0, 0],
+		[1, 0],
+		[0, 1],
+		[1, 1]
+		]
+    }   
+	{
+      "name": "I",
+      "type": "simple",
+	  "coordinates": [
+		[0, 0],
+		[0, 1],
+		[0, 2],
+		[0, 3]
+		]
+    }
+	{
+      "name": "Z",
+      "type": "simple",
+	  "coordinates": [
+		[0, 0],
+		[1, 0],
+		[1, 1],
+		[2, 1]
+		]
+    }
+	{
+      "name": "S",
+      "type": "simple",
+	  "coordinates": [
+		[1, 0],
+		[2, 0],
+		[0, 1],
+		[1, 1]
+		]
+    }
+	{
+      "name": "J",
+      "type": "simple",
+	  "coordinates": [
+		[1, 0],
+		[1, 1],
+		[0, 2],
+		[1, 2]
+		]
+    }  
+	{
+      "name": "L",
+      "type": "simple",
+	  "coordinates": [
+		[0, 0],
+		[0, 1],
+		[0, 2],
+		[1, 2]
+		]
+    }   
+  ]
+}
