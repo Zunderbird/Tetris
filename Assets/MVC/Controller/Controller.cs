@@ -52,7 +52,7 @@ public class Controller
     private void OnLineIsCollected(object sender, EventArgs e)
     {
         UnityEngine.Debug.Log("Collected!");
-        TetrisView.DestroyLine(Model.CollectedLine.Count - 1);
+        TetrisView.DestroyLine(Model.CollectedLine[Model.CollectedLine.Count - 1]);
     }
 
     private void OnGameOver(object sender, EventArgs e)

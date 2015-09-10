@@ -177,7 +177,7 @@ public class TetrisModel
     {
         while (m_collectedLine.Count > 0)
         {
-            UnityEngine.Debug.Log(m_collectedLine.Count - 1);
+            UnityEngine.Debug.Log(m_collectedLine[m_collectedLine.Count - 1]);
             LineIsCollected(this, EventArgs.Empty);
             m_board.DestroyLine(m_collectedLine[m_collectedLine.Count - 1]);
             m_collectedLine.RemoveAt(m_collectedLine.Count - 1);
