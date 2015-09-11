@@ -10,14 +10,8 @@ public class Controller
 
     public Controller(ITetrisView i_iTetrisView)
     {
-        string _shapesFileContent = System.IO.File.ReadAllText("Assets/StandardAssets/DataObjects/shapes.json");
-        var _shapes = SimpleJSON.JSON.Parse(_shapesFileContent);
-
-        string _coloursFileContent = System.IO.File.ReadAllText("Assets/StandardAssets/DataObjects/colours.json");
-        var _colours = SimpleJSON.JSON.Parse(_coloursFileContent);
-
         TetrisView = i_iTetrisView;
-        Model = new TetrisModel(_shapes, _colours);
+        Model = new TetrisModel(Preloader.Shapes, Preloader.Colours);
 
         Model.ShapesMoveIsFinished += OnShapesMoveIsFinished;
         Model.LineIsCollected += OnLineIsCollected;
