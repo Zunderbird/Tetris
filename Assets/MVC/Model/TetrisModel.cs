@@ -23,24 +23,15 @@ public class TetrisModel
 
     public TetrisModel(SimpleJSON.JSONNode i_shapes, SimpleJSON.JSONNode i_colours)
     {
-        m_score = 0;
-        m_level = 1;
-        m_speed = 1;
-
-        m_boardWidth = 10;
-        m_boardHeight = 24;
-        m_board = new Board(m_boardWidth, m_boardHeight);
-
         m_shapes = i_shapes;
         m_colours = i_colours;
 
-        m_nextShape = GenerateNextShape();
-        AddShape();
-
-        m_collectedLine = new List<int>();
-
+        this.NewGame();
     }
 
+    public delegate void MovementEvent(MovementEventArgs e);
+    public event MovementEvent MovementDone;
+    public event EventHandler RotateDone;
     public event EventHandler ScorePointsGained;
     public event EventHandler LevelUp;
     public event EventHandler ShapesMoveIsFinished;
@@ -92,6 +83,22 @@ public class TetrisModel
         }
     }
 
+    public void NewGame()
+    {
+        m_score = 0;
+        m_level = 1;
+        m_speed = 1;
+
+        m_boardWidth = 10;
+        m_boardHeight = 24;
+        m_board = new Board(m_boardWidth, m_boardHeight);
+
+        m_nextShape = GenerateNextShape();
+        AddShape();
+
+        m_collectedLine = new List<int>();
+    }
+
     public static TetrisShape GenerateNextShape()
     {
         int _nextShapeIndex = rand.Next(m_shapes["shapes"].Count);
@@ -120,7 +127,7 @@ public class TetrisModel
         return m_board.CheckShapeOffset(m_currentShape, new Point (0, 0));
     }
 
-    public bool MoveShape(MoveDirection i_moveDirection)
+    public void MoveShape(MoveDirection i_moveDirection)
     {
         Point _offset;
 
@@ -141,10 +148,15 @@ public class TetrisModel
                     _offset = new Point(0, -1);
                 }
                 break;
-            default: return false;
+            default: return;
         }
 
-        return IsMovementDone(_offset, i_moveDirection);
+        if (IsMovementDone(_offset, i_moveDirection))
+        {
+            var eventArg = new MovementEventArgs();
+            eventArg.MoveDirect = i_moveDirection;
+            MovementDone(eventArg);
+        }
     }
 
     private bool IsMovementDone(Point i_offset, MoveDirection i_moveDirection)
@@ -177,23 +189,21 @@ public class TetrisModel
     {
         while (m_collectedLine.Count > 0)
         {
-            UnityEngine.Debug.Log(m_collectedLine[m_collectedLine.Count - 1]);
             LineIsCollected(this, EventArgs.Empty);
             m_board.DestroyLine(m_collectedLine[m_collectedLine.Count - 1]);
             m_collectedLine.RemoveAt(m_collectedLine.Count - 1);
         }
     }
 
-    public bool RotateShape(RotateDirection i_rotateDirection)
+    public void RotateShape(RotateDirection i_rotateDirection)
     {
         TetrisShape _shape =  m_currentShape.Rotate(i_rotateDirection);
 
         if (m_board.CheckShapeOffset(_shape, new Point(0, 0)) == true)
         {
             m_currentShape = _shape;
-            return true;
+            RotateDone(this, EventArgs.Empty);
         }
-        return false;
     }
 
 }

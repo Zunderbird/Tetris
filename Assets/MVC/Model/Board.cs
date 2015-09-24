@@ -25,7 +25,6 @@ public class Board
             m_tetrisLines.Add(new int[m_width]);
             m_linesCount.Add(0);
         }
-
     }
 
     public Point CurrentShapeCoord
@@ -71,6 +70,7 @@ public class Board
                 }
             }
         }
+        _collectedLine.Sort();
         return _collectedLine;
     }
 
@@ -79,10 +79,10 @@ public class Board
         foreach (Point _block in i_shape.Blocks)
         {
             Point _coord = m_currentShapeCoord + _block + i_offset;
-
-            if (_coord.Y >= m_height) continue;
-            else if (_coord.X < 0 || _coord.X > m_width - 1 || _coord.Y < 0 || this[_coord] == 1)
-                return false;
+    
+            if (_coord.X >= 0 && _coord.X <= m_width - 1 && _coord.Y >= 0)
+                if (_coord.Y >= m_height || this[_coord] == 0) continue;
+            return false;
         }
         return true;
     }

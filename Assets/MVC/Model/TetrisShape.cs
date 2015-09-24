@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
+using System;
 
 public class TetrisShape 
 {
     private List<Point> m_shapeBlocks;
-    
 
     public TetrisShape()
     {
@@ -31,8 +31,7 @@ public class TetrisShape
 
             foreach (Point _point in m_shapeBlocks)
             {
-                if (_point.X > _width)
-                    _width = _point.X;
+                _width = Math.Max(_width, _point.X);
             }
             return _width;
         }
@@ -46,8 +45,7 @@ public class TetrisShape
 
             foreach (Point _point in m_shapeBlocks)
             {
-                if (_point.Y > _height)
-                    _height = _point.Y;
+                _height = Math.Max(_height, _point.Y);
             }
             return _height;
         }
@@ -63,15 +61,16 @@ public class TetrisShape
         TetrisShape _shape = new TetrisShape();
         Point _offset;
         Point _unitVector;
+        int facet = Math.Max(Width, Height);
 
         if (i_rotateDirection == RotateDirection.ClockWise)
         {
-            _offset = new Point(0, Width);
+            _offset = new Point(0, facet);
             _unitVector = new Point(1, -1);
         }
         else
         {
-            _offset = new Point(Height, 0);
+            _offset = new Point(facet, 0);
             _unitVector = new Point(-1, 1);
         }
 

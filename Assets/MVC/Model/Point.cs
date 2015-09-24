@@ -1,5 +1,4 @@
 ﻿
-
 public struct Point 
 {
     public static readonly Point Empty = new Point();

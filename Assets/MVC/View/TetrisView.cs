@@ -9,10 +9,28 @@ public partial class TetrisView : ITetrisView
     private GameObject m_currentShape;
     private GameObject m_nextShape;
     private GameObject m_shapeHeap;
+    private TetrisModel m_model;
 
-    public TetrisView()
+    public TetrisView(TetrisModel i_model)
     {
         m_shapeHeap = new GameObject("ShapeHeap");
+        m_model = i_model;
+        m_model.MovementDone += OnMovementDone;
+        m_model.RotateDone += OnRotateDone;
+        m_model.ShapesMoveIsFinished += OnShapesMoveIsFinished;
+        m_model.LineIsCollected += OnLineIsCollected;
+        m_model.GameOver += OnGameOver;
+
+        this.NewGame();
+    }
+
+    private void NewGame()
+    {
+        this.DisplayBoard();
+        this.UpdateScore();
+        this.UpdateLevel();
+        this.DisplayNextShape(m_model.NextShape);
+        this.SpawnShape(m_model.CurrentShape, m_model.CurrentShapeCoord);
     }
 
     public void DisplayBoard()
@@ -102,6 +120,7 @@ public partial class TetrisView : ITetrisView
 
     public void UpdateScore()
     {
+        GUI.Label(new Rect(Screen.width/2, Screen.height/2, 100, 50), "Text");
         
     }
 
@@ -136,5 +155,31 @@ public partial class TetrisView : ITetrisView
             m_currentShape.transform.GetChild(0).transform.parent = m_shapeHeap.transform;
         }
         UnityEngine.Object.Destroy(m_currentShape);
+    }
+
+    private void OnMovementDone(MovementEventArgs e)
+    {
+        this.MoveShape(e.MoveDirect);
+    }
+
+    private void OnRotateDone(object sender, EventArgs e)
+    {
+        this.RotateShape(m_model.CurrentShape);
+    }
+
+    private void OnShapesMoveIsFinished(object sender, EventArgs e)
+    {
+        this.DisplayNextShape(m_model.NextShape);
+        SpawnShape(m_model.CurrentShape, m_model.CurrentShapeCoord);
+    }
+
+    private void OnLineIsCollected(object sender, EventArgs e)
+    {
+        DestroyLine(m_model.CollectedLine[m_model.CollectedLine.Count - 1]);
+    }
+
+    private void OnGameOver(object sender, EventArgs e)
+    {
+        UnityEngine.Debug.Log("Game Over!");
     }
 }
