@@ -1,0 +1,28 @@
+{
+  "colors": [
+    {
+      "name": "red",
+      "colorCode": "0xff0000"
+    },    
+	{
+      "name": "green",
+      "colorCode": "0x00ff00"
+    },
+	{
+      "name": "blue",
+      "colorCode": "0x0000ff"
+    },
+	{
+      "name": "skyBlue",
+      "colorCode": "0x00ffff"
+    },
+	{
+      "name": "magenta",
+      "colorCode": "0xff00ff"
+    },
+	{
+      "name": "yellow",
+      "colorCode": "0xffff00"
+    }
+  ]
+}

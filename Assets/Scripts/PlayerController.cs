@@ -6,6 +6,7 @@ public class PlayerController : MonoBehaviour
     public AudioSource backgroundMusic;
 
     Controller controller;
+    TetrisModel model;
 
     private float m_timeBetweenFalls = 0.3f;
 
@@ -18,7 +19,7 @@ public class PlayerController : MonoBehaviour
         if (backgroundMusic != null)
             backgroundMusic.Play();
 
-        var model = new TetrisModel(Preloader.Shapes, Preloader.Colours);
+        model = new TetrisModel(10, 24);
 
         var view = new TetrisView(model);
 
@@ -29,7 +30,7 @@ public class PlayerController : MonoBehaviour
     {
         if (m_verticalTimeCounter < 0)
         {
-            m_verticalTimeCounter = m_timeBetweenFalls;
+            m_verticalTimeCounter = m_timeBetweenFalls / model.Level;
             controller.MoveTrigger(MoveDirection.Down);
         }
         m_verticalTimeCounter -= Time.deltaTime * 0.5f;
@@ -49,7 +50,13 @@ public class PlayerController : MonoBehaviour
 
         if (Input.GetButtonDown("Vertical")) controller.MoveTrigger(MoveDirection.Down);
         
-        if (Input.GetButton("Vertical")) m_timeBetweenFalls *= 0.05f;        
-	
+        if (Input.GetButton("Vertical")) m_timeBetweenFalls *= 0.05f;
+       // if (Input.GetButton("Jump")) m_timeBetweenFalls *= 0.05f;
 	}
+
+    void OnGUI()
+    {
+        GUI.Label(new Rect(50, 50, 100, 50), "Score: " + model.Score);
+        GUI.Label(new Rect(200, 50, 100, 50), "Level:  " + model.Level);
+    }
 }

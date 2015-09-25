@@ -15,9 +15,9 @@ public interface ITetrisView
 
     void DisplayNextShape(TetrisShape i_shape);
 
-    void UpdateScore();
+    //void UpdateScore();
 
-    void UpdateLevel();
+    //void UpdateLevel();
 
     void DisplayGameOver();
 

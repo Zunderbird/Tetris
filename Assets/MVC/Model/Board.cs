@@ -3,26 +3,26 @@ using System;
 
 public class Board 
 {
-    private int m_width;
-    private int m_height;
+    private List<int[]> m_tetrisLines;
 
     private List<int> m_linesCount;
 
     private Point m_currentShapeCoord;
 
-    private List<int[]> m_tetrisLines;
+    public int Width { get; private set; }
+    public int Height { get; private set; }
 
     public Board(int i_width, int i_height)
     {
-        m_width = i_width;
-        m_height = i_height;
+        Width = i_width;
+        Height = i_height;
 
         m_linesCount = new List<int>();
         m_tetrisLines = new List<int[]>();
 
-        while (m_tetrisLines.Count < m_height)
+        while (m_tetrisLines.Count < Height)
         {
-            m_tetrisLines.Add(new int[m_width]);
+            m_tetrisLines.Add(new int[Width]);
             m_linesCount.Add(0);
         }
     }
@@ -59,12 +59,12 @@ public class Board
         {
             Point _coord = new Point(m_currentShapeCoord + _block);
 
-            if (_coord.Y < m_height)
+            if (_coord.Y < Height)
             {
                 this[_coord] = 1;
                 m_linesCount[_coord.Y] += 1;
 
-                if (m_linesCount[_coord.Y] == m_width)
+                if (m_linesCount[_coord.Y] == Width)
                 {
                     _collectedLine.Add(_coord.Y);
                 }
@@ -80,8 +80,8 @@ public class Board
         {
             Point _coord = m_currentShapeCoord + _block + i_offset;
     
-            if (_coord.X >= 0 && _coord.X <= m_width - 1 && _coord.Y >= 0)
-                if (_coord.Y >= m_height || this[_coord] == 0) continue;
+            if (_coord.X >= 0 && _coord.X <= Width - 1 && _coord.Y >= 0)
+                if (_coord.Y >= Height || this[_coord] == 0) continue;
             return false;
         }
         return true;
@@ -90,7 +90,7 @@ public class Board
     public void DestroyLine(int i_lineIndex)
     {
         m_tetrisLines.RemoveAt(i_lineIndex);
-        m_tetrisLines.Add(new int[m_width]);
+        m_tetrisLines.Add(new int[Width]);
 
         m_linesCount.RemoveAt(i_lineIndex);
         m_linesCount.Add(0);

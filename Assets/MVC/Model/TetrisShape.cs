@@ -5,6 +5,16 @@ public class TetrisShape
 {
     private List<Point> m_shapeBlocks;
 
+    public List<Point> Blocks
+    {
+        get
+        {
+            return new List<Point>(m_shapeBlocks);
+        }
+    }
+
+    public int HexColor { get; set; }
+
     public TetrisShape()
     {
         m_shapeBlocks = new List<Point>();
@@ -15,12 +25,10 @@ public class TetrisShape
         m_shapeBlocks = new List<Point>(i_shapeBlocks);
     }
 
-    public List<Point> Blocks
+    public TetrisShape(TetrisShape i_shape)
     {
-        get
-        {
-            return new List<Point> (m_shapeBlocks);
-        }
+        m_shapeBlocks = new List<Point>(i_shape.Blocks);
+        HexColor = i_shape.HexColor;
     }
 
     public int Width

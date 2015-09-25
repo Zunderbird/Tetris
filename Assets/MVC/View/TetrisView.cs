@@ -15,9 +15,11 @@ public partial class TetrisView : ITetrisView
     {
         m_shapeHeap = new GameObject("ShapeHeap");
         m_model = i_model;
+
         m_model.MovementDone += OnMovementDone;
         m_model.RotateDone += OnRotateDone;
-        m_model.ShapesMoveIsFinished += OnShapesMoveIsFinished;
+        m_model.ShapeIsAdded += OnShapeIsAdded;
+        m_model.ShapeIsAttached += OnShapeIsAttached;
         m_model.LineIsCollected += OnLineIsCollected;
         m_model.GameOver += OnGameOver;
 
@@ -27,8 +29,6 @@ public partial class TetrisView : ITetrisView
     private void NewGame()
     {
         this.DisplayBoard();
-        this.UpdateScore();
-        this.UpdateLevel();
         this.DisplayNextShape(m_model.NextShape);
         this.SpawnShape(m_model.CurrentShape, m_model.CurrentShapeCoord);
     }
@@ -40,11 +40,12 @@ public partial class TetrisView : ITetrisView
 
     public void SpawnShape(TetrisShape i_shape, Point i_spawnCoord)
     {
-        if (m_currentShape != null) AttachShape(); 
         m_currentShape = CreateShape(i_shape);
         m_currentShape.transform.position = new Vector2(i_spawnCoord.X * 0.5f - 2.25f, i_spawnCoord.Y * 0.5f - 5.25f);
       
         Color _color = new Color(UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f));
+        //int hexCode = i_shape.HexColor;
+        //Color _color = hexCode.ToColor();
         PaintShape(_color);
         
     }
@@ -118,16 +119,6 @@ public partial class TetrisView : ITetrisView
         m_nextShape.transform.position = new Vector2(3.75f, 3.75f);
     }
 
-    public void UpdateScore()
-    {
-        GUI.Label(new Rect(Screen.width/2, Screen.height/2, 100, 50), "Text");
-        
-    }
-
-    public void UpdateLevel()
-    {
-    }
-
     public void DisplayGameOver()
     {
     }
@@ -167,10 +158,15 @@ public partial class TetrisView : ITetrisView
         this.RotateShape(m_model.CurrentShape);
     }
 
-    private void OnShapesMoveIsFinished(object sender, EventArgs e)
+    private void OnShapeIsAdded(object sender, EventArgs e)
     {
         this.DisplayNextShape(m_model.NextShape);
         SpawnShape(m_model.CurrentShape, m_model.CurrentShapeCoord);
+    }
+
+    private void OnShapeIsAttached(object sender, EventArgs e)
+    {
+        AttachShape(); 
     }
 
     private void OnLineIsCollected(object sender, EventArgs e)

@@ -5,14 +5,12 @@ using System;
 
 public class PreloaderScript : MonoBehaviour 
 {
-
 	IEnumerator Start () 
-    {
-        Preloader.LoadResources();
+    {     
+        JsonParser.LoadResources();
 
         yield return new WaitForSeconds (2);
 
         Application.LoadLevel("Stage_01");
 	}
-
 }

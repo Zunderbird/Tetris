@@ -3,12 +3,6 @@ using System.Collections.Generic;
 
 public class TetrisModel 
 {
-    private int m_score;
-    private int m_level;
-    private int m_speed;
-
-    private int m_boardWidth;
-    private int m_boardHeight;
     private Board m_board;
 
     private TetrisShape m_currentShape;
@@ -16,82 +10,25 @@ public class TetrisModel
 
     List<int> m_collectedLine;
 
-    private static SimpleJSON.JSONNode m_shapes;
-    private static SimpleJSON.JSONNode m_colours;
-
-    static Random rand = new Random();
-
-    public TetrisModel(SimpleJSON.JSONNode i_shapes, SimpleJSON.JSONNode i_colours)
-    {
-        m_shapes = i_shapes;
-        m_colours = i_colours;
-
-        this.NewGame();
-    }
+    public int Level { get; set; }
+    public int Score { get; private set; }
+    public int CollectedCount { get; private set; }
 
     public delegate void MovementEvent(MovementEventArgs e);
     public event MovementEvent MovementDone;
     public event EventHandler RotateDone;
-    public event EventHandler ScorePointsGained;
-    public event EventHandler LevelUp;
-    public event EventHandler ShapesMoveIsFinished;
+    public event EventHandler ShapeIsAdded;
+    public event EventHandler ShapeIsAttached;
     public event EventHandler LineIsCollected;
     public event EventHandler GameOver;
 
-    public TetrisShape NextShape
+    public TetrisModel(int i_width, int i_height)
     {
-        get
-        {
-            return m_nextShape;
-        }
-    }
+        Score = 0;
+        CollectedCount = 0;
+        Level = 1;
 
-    public TetrisShape CurrentShape
-    {
-        get
-        {
-            return m_currentShape;
-        }
-    }
-
-    public Point CurrentShapeCoord
-    {
-        get
-        {
-            return m_board.CurrentShapeCoord;
-        }
-    }
-
-    public int Level
-    {
-        get
-        {
-            return m_level;
-        }
-        set
-        {
-            m_level = value;
-            m_speed = m_level * 1;
-        }
-    }
-
-    public List<int> CollectedLine
-    {
-        get
-        {
-            return m_collectedLine;
-        }
-    }
-
-    public void NewGame()
-    {
-        m_score = 0;
-        m_level = 1;
-        m_speed = 1;
-
-        m_boardWidth = 10;
-        m_boardHeight = 24;
-        m_board = new Board(m_boardWidth, m_boardHeight);
+        m_board = new Board(i_width, i_height);
 
         m_nextShape = GenerateNextShape();
         AddShape();
@@ -99,32 +36,51 @@ public class TetrisModel
         m_collectedLine = new List<int>();
     }
 
-    public static TetrisShape GenerateNextShape()
+    public TetrisShape NextShape
     {
-        int _nextShapeIndex = rand.Next(m_shapes["shapes"].Count);
-        int _nextShapeParticleCount = m_shapes["shapes"][_nextShapeIndex]["coordinates"].Count;
-
-        List<Point> _nextShapeParticles = new List<Point>();
-        Point _nextShapeParticle = new Point();
-
-        for (int i = 0; i < _nextShapeParticleCount; i++)
+        get
         {
-            _nextShapeParticle.X = m_shapes["shapes"][_nextShapeIndex]["coordinates"][i][0].AsInt;
-            _nextShapeParticle.Y = m_shapes["shapes"][_nextShapeIndex]["coordinates"][i][1].AsInt;
-
-            _nextShapeParticles.Add(_nextShapeParticle);
+            return new TetrisShape(m_nextShape);
         }
-        return new TetrisShape(_nextShapeParticles);
     }
 
-    public bool AddShape()
+    public TetrisShape CurrentShape
+    {
+        get
+        {
+            return new TetrisShape(m_currentShape);
+        }
+    }
+
+    public Point CurrentShapeCoord
+    {
+        get
+        {
+            return new Point(m_board.CurrentShapeCoord);
+        }
+    }
+
+    public List<int> CollectedLine
+    {
+        get
+        {
+            return new List<int>(m_collectedLine);
+        }
+    }
+
+    private static TetrisShape GenerateNextShape()
+    {
+        var newShape = JsonParser.GetRandomShape();
+        newShape.HexColor = JsonParser.GetRandomColor();
+        return newShape;
+    }
+
+    private bool AddShape()
     {
         m_currentShape = m_nextShape;
         m_nextShape = GenerateNextShape();
-
-        m_board.CurrentShapeCoord = new Point((m_boardWidth - m_currentShape.Width) / 2, m_boardHeight - 1);
-
-        return m_board.CheckShapeOffset(m_currentShape, new Point (0, 0));
+        m_board.CurrentShapeCoord = new Point((m_board.Width - m_currentShape.Width) / 2, m_board.Height - m_currentShape.Height - 2);
+        return m_board.CheckShapeOffset(m_currentShape, new Point(0, 0));
     }
 
     public void MoveShape(MoveDirection i_moveDirection)
@@ -168,19 +124,21 @@ public class TetrisModel
         }
         else if (i_moveDirection == MoveDirection.Down)
         {
-            MovementFinish();
+            FinishMovement();
         }
         return false;
     }
 
-    private void MovementFinish()
+    private void FinishMovement()
     {
         m_collectedLine = m_board.AttachShape(m_currentShape);
+        ShapeIsAttached(this, EventArgs.Empty);
+
+        DestroyCollectedLines();
 
         if (AddShape() == true)
         {
-            ShapesMoveIsFinished(this, EventArgs.Empty);
-            DestroyCollectedLines();
+            ShapeIsAdded(this, EventArgs.Empty);
         }
         else GameOver(this, EventArgs.Empty);
     }
@@ -190,9 +148,25 @@ public class TetrisModel
         while (m_collectedLine.Count > 0)
         {
             LineIsCollected(this, EventArgs.Empty);
+            GaineScorePoints();
             m_board.DestroyLine(m_collectedLine[m_collectedLine.Count - 1]);
             m_collectedLine.RemoveAt(m_collectedLine.Count - 1);
         }
+    }
+
+    private void GaineScorePoints()
+    {
+        int collectedToNextLevel = 10;
+
+        Score += Level;
+        CollectedCount += 1;
+
+        if (CollectedCount % collectedToNextLevel == 0) LevelUp();
+    }
+
+    private void LevelUp()
+    {
+        Level += 1;
     }
 
     public void RotateShape(RotateDirection i_rotateDirection)
