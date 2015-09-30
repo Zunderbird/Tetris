@@ -1,24 +1,31 @@
-﻿using UnityEngine;
-using System.Collections;
-using System;
+﻿using Assets.MVC.Model;
 
-public class Controller
+namespace Assets.MVC.Controller
 {
-    TetrisModel Model { get; set; }
-
-    public Controller(TetrisModel i_model)
+    public class Controller
     {
-        Model = i_model;
-    }
+        private readonly TetrisModel _mModel;
 
-    public void RotateTrigger (RotateDirection i_rotateDirection)
-    {
-        Model.RotateShape(i_rotateDirection);
-    }
+        public Controller(TetrisModel model)
+        {
+            _mModel = model;
+        }
 
-    public void MoveTrigger(MoveDirection i_direction)
-    {
-        Model.MoveShape(i_direction);
-    }
+        public void RotateTrigger (RotateDirection rotateDirection)
+        {
+            _mModel.RotateShape(rotateDirection);
+        }
 
+        public void MoveTrigger(MoveDirection direction)
+        {
+            _mModel.MoveShape(direction);
+        }
+
+        public void DropTrigger()
+        {
+            _mModel.DropShape();
+        }
+
+    }
 }
+

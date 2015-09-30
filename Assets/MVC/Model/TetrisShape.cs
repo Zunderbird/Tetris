@@ -1,91 +1,96 @@
 ﻿using System.Collections.Generic;
 using System;
 
-public class TetrisShape 
+namespace Assets.MVC.Model
 {
-    private List<Point> m_shapeBlocks;
-
-    public List<Point> Blocks
+    public class TetrisShape
     {
-        get
+        private readonly List<Point> _mShapeBlocks;
+
+        public List<Point> Blocks
         {
-            return new List<Point>(m_shapeBlocks);
-        }
-    }
-
-    public int HexColor { get; set; }
-
-    public TetrisShape()
-    {
-        m_shapeBlocks = new List<Point>();
-    }
-
-    public TetrisShape(List<Point> i_shapeBlocks)
-    {
-        m_shapeBlocks = new List<Point>(i_shapeBlocks);
-    }
-
-    public TetrisShape(TetrisShape i_shape)
-    {
-        m_shapeBlocks = new List<Point>(i_shape.Blocks);
-        HexColor = i_shape.HexColor;
-    }
-
-    public int Width
-    {
-        get
-        {
-            int _width = 0;
-
-            foreach (Point _point in m_shapeBlocks)
+            get
             {
-                _width = Math.Max(_width, _point.X);
+                return new List<Point>(_mShapeBlocks);
             }
-            return _width;
         }
-    }
 
-    public int Height
-    {
-        get
+        public int HexColor { get; set; }
+
+        public TetrisShape()
         {
-            int _height = 0;
+            _mShapeBlocks = new List<Point>();
+        }
 
-            foreach (Point _point in m_shapeBlocks)
+        public TetrisShape(List<Point> shapeBlocks)
+        {
+            _mShapeBlocks = new List<Point>(shapeBlocks);
+        }
+
+        public TetrisShape(TetrisShape shape)
+        {
+            _mShapeBlocks = new List<Point>(shape.Blocks);
+            HexColor = shape.HexColor;
+        }
+
+        public int Width
+        {
+            get
             {
-                _height = Math.Max(_height, _point.Y);
+                var width = 0;
+
+                foreach (var point in _mShapeBlocks)
+                {
+                    width = Math.Max(width, point.X);
+                }
+                return width;
             }
-            return _height;
         }
-    }
 
-    private void AddBlock(Point i_shapeParticle)
-    {
-        m_shapeBlocks.Add(new Point(i_shapeParticle.X, i_shapeParticle.Y));
-    }
-
-    public TetrisShape Rotate(RotateDirection i_rotateDirection)
-    {
-        TetrisShape _shape = new TetrisShape();
-        Point _offset;
-        Point _unitVector;
-        int facet = Math.Max(Width, Height);
-
-        if (i_rotateDirection == RotateDirection.ClockWise)
+        public int Height
         {
-            _offset = new Point(0, facet);
-            _unitVector = new Point(1, -1);
-        }
-        else
-        {
-            _offset = new Point(facet, 0);
-            _unitVector = new Point(-1, 1);
+            get
+            {
+                int height = 0;
+
+                foreach (var point in _mShapeBlocks)
+                {
+                    height = Math.Max(height, point.Y);
+                }
+                return height;
+            }
         }
 
-        foreach (Point _block in m_shapeBlocks)
+        private void AddBlock(Point shapeParticle)
         {
-            _shape.AddBlock(Point.Swap(_block) * _unitVector + _offset);
+            _mShapeBlocks.Add(new Point(shapeParticle.X, shapeParticle.Y));
         }
-        return _shape;
+
+        public TetrisShape Rotate(RotateDirection rotateDirection)
+        {
+            var shape = new TetrisShape();
+            Point offset;
+            Point unitVector;
+            var facet = Math.Max(Width, Height);
+
+            if (rotateDirection == RotateDirection.ClockWise)
+            {
+                offset = new Point(0, facet);
+                unitVector = new Point(1, -1);
+            }
+            else
+            {
+                offset = new Point(facet, 0);
+                unitVector = new Point(-1, 1);
+            }
+
+            foreach (var block in _mShapeBlocks)
+            {
+                shape.AddBlock(Point.Swap(block) * unitVector + offset);
+            }
+            shape.HexColor = HexColor;
+
+            return shape;
+        }
     }
 }

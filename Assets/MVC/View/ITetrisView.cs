@@ -1,24 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Assets.MVC.Model;
 
-public interface ITetrisView  
+namespace Assets.MVC.View
 {
-    void DisplayBoard();
+    public interface ITetrisView
+    {
+        void DisplayBoard();
 
-    void SpawnShape(TetrisShape i_shape, Point i_spawnCoord); 
-    
-    void MoveShape(MoveDirection i_moveDirection);
+        void SpawnShape(TetrisShape shape, Point spawnCoord);
 
-    void RotateShape(TetrisShape i_shape);
+        void MoveShape(MoveDirection moveDirection);
 
-    void DestroyLine(int i_numbers);
+        void RotateShape(TetrisShape shape);
 
-    void DisplayNextShape(TetrisShape i_shape);
+        void DestroyLine(int numbers);
 
-    //void UpdateScore();
+        void DisplayNextShape(TetrisShape shape);
 
-    //void UpdateLevel();
+        void DisplayGameOver();
 
-    void DisplayGameOver();
-
+    }
 }
+

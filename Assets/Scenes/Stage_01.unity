@@ -114,7 +114,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 66224023e67f1444fa79b6e55fcd6ad2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  backgroundMusic: {fileID: 8292682, guid: dc7963040b574564480be40f148f469a, type: 2}
+  BackgroundMusic: {fileID: 8292682, guid: dc7963040b574564480be40f148f469a, type: 2}
+  hexColor: 
 --- !u!4 &145664049
 Transform:
   m_ObjectHideFlags: 0

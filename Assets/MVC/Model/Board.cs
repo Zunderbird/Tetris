@@ -1,98 +1,100 @@
 ﻿using System.Collections.Generic;
-using System;
 
-public class Board 
+namespace Assets.MVC.Model
 {
-    private List<int[]> m_tetrisLines;
-
-    private List<int> m_linesCount;
-
-    private Point m_currentShapeCoord;
-
-    public int Width { get; private set; }
-    public int Height { get; private set; }
-
-    public Board(int i_width, int i_height)
+    public class Board
     {
-        Width = i_width;
-        Height = i_height;
+        private readonly List<int[]> _mTetrisLines;
 
-        m_linesCount = new List<int>();
-        m_tetrisLines = new List<int[]>();
+        private readonly List<int> _mLinesCount;
 
-        while (m_tetrisLines.Count < Height)
+        private Point _mCurrentShapeCoord;
+
+        public int Width { get; private set; }
+        public int Height { get; private set; }
+
+        public Board(int width, int height)
         {
-            m_tetrisLines.Add(new int[Width]);
-            m_linesCount.Add(0);
-        }
-    }
+            Width = width;
+            Height = height;
 
-    public Point CurrentShapeCoord
-    {
-        get
-        {
-            return m_currentShapeCoord;
-        }
-        set
-        {
-            m_currentShapeCoord = new Point(value);
-        }
-    }
+            _mLinesCount = new List<int>();
+            _mTetrisLines = new List<int[]>();
 
-    private int this[Point i_point]
-    {
-        get
-        {
-            return m_tetrisLines[i_point.Y][i_point.X];
-        }
-        set
-        {
-            m_tetrisLines[i_point.Y][i_point.X] = value;
-        }
-    }
-
-    public List<int> AttachShape(TetrisShape i_shape)
-    {
-        List<int> _collectedLine = new List<int>();
-
-        foreach (Point _block in i_shape.Blocks)
-        {
-            Point _coord = new Point(m_currentShapeCoord + _block);
-
-            if (_coord.Y < Height)
+            while (_mTetrisLines.Count < Height)
             {
-                this[_coord] = 1;
-                m_linesCount[_coord.Y] += 1;
-
-                if (m_linesCount[_coord.Y] == Width)
-                {
-                    _collectedLine.Add(_coord.Y);
-                }
+                _mTetrisLines.Add(new int[Width]);
+                _mLinesCount.Add(0);
             }
         }
-        _collectedLine.Sort();
-        return _collectedLine;
-    }
 
-    public bool CheckShapeOffset(TetrisShape i_shape, Point i_offset)
-    {
-        foreach (Point _block in i_shape.Blocks)
+        public Point CurrentShapeCoord
         {
-            Point _coord = m_currentShapeCoord + _block + i_offset;
-    
-            if (_coord.X >= 0 && _coord.X <= Width - 1 && _coord.Y >= 0)
-                if (_coord.Y >= Height || this[_coord] == 0) continue;
-            return false;
+            get
+            {
+                return _mCurrentShapeCoord;
+            }
+            set
+            {
+                _mCurrentShapeCoord = new Point(value);
+            }
         }
-        return true;
-    }
 
-    public void DestroyLine(int i_lineIndex)
-    {
-        m_tetrisLines.RemoveAt(i_lineIndex);
-        m_tetrisLines.Add(new int[Width]);
+        private int this[Point point]
+        {
+            get
+            {
+                return _mTetrisLines[point.Y][point.X];
+            }
+            set
+            {
+                _mTetrisLines[point.Y][point.X] = value;
+            }
+        }
 
-        m_linesCount.RemoveAt(i_lineIndex);
-        m_linesCount.Add(0);
+        public List<int> AttachShape(TetrisShape shape)
+        {
+            var collectedLine = new List<int>();
+
+            foreach (var block in shape.Blocks)
+            {
+                var coord = new Point(_mCurrentShapeCoord + block);
+
+                if (coord.Y < Height)
+                {
+                    this[coord] = 1;
+                    _mLinesCount[coord.Y] += 1;
+
+                    if (_mLinesCount[coord.Y] == Width)
+                    {
+                        collectedLine.Add(coord.Y);
+                    }
+                }
+            }
+            collectedLine.Sort();
+            return collectedLine;
+        }
+
+        public bool CheckShapeOffset(TetrisShape shape, Point offset)
+        {
+            foreach (var block in shape.Blocks)
+            {
+                var coord = _mCurrentShapeCoord + block + offset;
+
+                if (coord.X >= 0 && coord.X <= Width - 1 && coord.Y >= 0)
+                    if (coord.Y >= Height || this[coord] == 0) continue;
+                return false;
+            }
+            return true;
+        }
+
+        public void DestroyLine(int lineIndex)
+        {
+            _mTetrisLines.RemoveAt(lineIndex);
+            _mTetrisLines.Add(new int[Width]);
+
+            _mLinesCount.RemoveAt(lineIndex);
+            _mLinesCount.Add(0);
+        }
     }
 }

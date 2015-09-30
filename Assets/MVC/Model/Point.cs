@@ -1,101 +1,88 @@
-﻿
-public struct Point 
+﻿namespace Assets.MVC.Model
 {
-    public static readonly Point Empty = new Point();
-
-    private int m_x;
-    private int m_y;
-
-    public Point(int i_x, int i_y)
+    public struct Point
     {
-        this.m_x = i_x;
-        this.m_y = i_y;
-    }
+        public static readonly Point Empty = new Point();
 
-    public Point(Point i_previousPoint)
-    {
-        m_x = i_previousPoint.X;
-        m_y = i_previousPoint.Y;
-    }
+        private int _mX;
+        private int _mY;
 
-    public int X
-    {
-        get
+        public Point(int x, int y)
         {
-            return m_x;
+            _mX = x;
+            _mY = y;
         }
-        set
+
+        public Point(Point previousPoint)
         {
-            m_x = value;
+            _mX = previousPoint.X;
+            _mY = previousPoint.Y;
         }
-    }
 
-    public int Y
-    {
-        get
+        public int X
         {
-            return m_y;
+            get { return _mX; }
+            set { _mX = value; }
         }
-        set
+
+        public int Y
         {
-            m_y = value;
+            get { return _mY; }
+            set { _mY = value; }
         }
-    }
 
-    public bool IsEmpty
-    {
-        get
+        public bool IsEmpty
         {
-            return m_x == 0 && m_y == 0;
+            get { return X == 0 && Y == 0; }
         }
-    }
 
-    public void Offset(int i_dx, int i_dy)
-    {
-        X += i_dx;
-        Y += i_dy;
-    }
+        public void Offset(int dx, int dy)
+        {
+            X += dx;
+            Y += dy;
+        }
 
-    public static Point operator + (Point i_left, Point i_right)
-    {
-        return new Point(i_left.X + i_right.X, i_left.Y + i_right.Y);
-    }
+        public static Point operator +(Point left, Point right)
+        {
+            return new Point(left.X + right.X, left.Y + right.Y);
+        }
 
-    public static Point operator - (Point i_left, Point i_right)
-    {
-        return new Point(i_left.X - i_right.X, i_left.Y - i_right.Y);
-    }
+        public static Point operator -(Point left, Point right)
+        {
+            return new Point(left.X - right.X, left.Y - right.Y);
+        }
 
-    public static Point operator * (Point i_left, Point i_right)
-    {
-        return new Point(i_left.X * i_right.X, i_left.Y * i_right.Y);
-    }
+        public static Point operator *(Point left, Point right)
+        {
+            return new Point(left.X * right.X, left.Y * right.Y);
+        }
 
-    public static Point Swap (Point i_point)
-    {
-        return new Point(i_point.Y, i_point.X);
-    }
+        public static Point Swap(Point point)
+        {
+            return new Point(point.Y, point.X);
+        }
 
-    public static bool operator == (Point i_left, Point i_right)
-    {
-        return i_left.X == i_right.X && i_left.Y == i_right.Y;
-    }
+        public static bool operator ==(Point left, Point right)
+        {
+            return left.X == right.X && left.Y == right.Y;
+        }
 
-    public static bool operator != (Point i_left, Point i_right)
-    {
-        return !(i_left == i_right);
-    }
+        public static bool operator !=(Point left, Point right)
+        {
+            return !(left == right);
+        }
 
-    public override bool Equals(object i_obj)
-    {
-        if (!(i_obj is Point)) return false;
-        Point _comp = (Point)i_obj;
+        public override bool Equals(object obj)
+        {
+            if (!(obj is Point)) return false;
+            var comp = (Point)obj;
 
-        return _comp.X == this.X && _comp.Y == this.Y;
-    }
+            return comp.X == X && comp.Y == Y;
+        }
 
-    public override int GetHashCode()
-    {
-        return m_x ^ m_y;
+        public override int GetHashCode()
+        {
+            return X ^ Y;
+        }
     }
 }

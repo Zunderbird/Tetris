@@ -1,28 +1,48 @@
 {
   "colors": [
-    {
+  	{
+      "name": "green",
+      "colorCode": "0xadff2f"
+    },
+	{
       "name": "red",
-      "colorCode": "0xff0000"
+      "colorCode": "0xff4466"
     },    
 	{
-      "name": "green",
-      "colorCode": "0x00ff00"
-    },
-	{
       "name": "blue",
-      "colorCode": "0x0000ff"
+      "colorCode": "0x0066ff"
     },
-	{
-      "name": "skyBlue",
-      "colorCode": "0x00ffff"
+		{
+      "name": "yellow",
+      "colorCode": "0xffcc00"
     },
 	{
       "name": "magenta",
-      "colorCode": "0xff00ff"
+      "colorCode": "0xdd66ff"
+    },
+		{
+      "name": "skyBlue",
+      "colorCode": "0x00eeff"
     },
 	{
-      "name": "yellow",
-      "colorCode": "0xffff00"
+      "name": "purple",
+      "colorCode": "0x8855ff"
+    },
+	{
+      "name": "turquoise",
+      "colorCode": "0x008b8b"
+    },
+	{
+      "name": "brown",
+      "colorCode": "0x8b4c39"
+    },
+		{
+      "name": "darkgreen",
+      "colorCode": "0x458b00"
+    },
+	{
+      "name": "orange",
+      "colorCode": "0xff7700"
     }
   ]
 }

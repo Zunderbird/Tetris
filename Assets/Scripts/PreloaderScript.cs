@@ -1,16 +1,20 @@
 ﻿using UnityEngine;
 using System.Collections;
-using System.Collections.Generic;
-using System;
+using Assets.MVC.Model;
 
-public class PreloaderScript : MonoBehaviour 
+namespace Assets.Scripts
 {
-	IEnumerator Start () 
-    {     
-        JsonParser.LoadResources();
+    public class PreloaderScript : MonoBehaviour
+    {
 
-        yield return new WaitForSeconds (2);
+        IEnumerator Start()
+        {
+            JsonReader.LoadResources();
 
-        Application.LoadLevel("Stage_01");
-	}
+            yield return new WaitForSeconds(2);
+
+            Application.LoadLevel("Stage_01");
+        }
+    }
+
 }

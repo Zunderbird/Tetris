@@ -2,7 +2,7 @@
   "shapes": [
     {
       "name": "T",
-      "type": "simple",
+      "type": "classic",
 	  "coordinates": [
 		[0, 0],
 		[1, 0],
@@ -12,61 +12,138 @@
     },    
 	{
       "name": "Q",
-      "type": "simple",
+      "type": "classic",
 	  "coordinates": [
 		[0, 0],
 		[1, 0],
 		[0, 1],
 		[1, 1]
 		]
-    }   
+    },   
 	{
       "name": "I",
-      "type": "simple",
+      "type": "classic",
 	  "coordinates": [
 		[1, 0],
 		[1, 1],
 		[1, 2],
 		[1, 3]
 		]
-    }
+    },
 	{
       "name": "Z",
-      "type": "simple",
+      "type": "classic",
 	  "coordinates": [
 		[0, 0],
 		[1, 0],
 		[1, 1],
 		[2, 1]
 		]
-    }
+    },
 	{
       "name": "S",
-      "type": "simple",
+      "type": "classic",
 	  "coordinates": [
 		[1, 0],
 		[2, 0],
 		[0, 1],
 		[1, 1]
 		]
-    }
+    },
 	{
       "name": "J",
-      "type": "simple",
+      "type": "classic",
 	  "coordinates": [
 		[1, 0],
 		[1, 1],
 		[0, 2],
 		[1, 2]
 		]
-    }  
+    }, 
 	{
       "name": "L",
-      "type": "simple",
+      "type": "classic",
 	  "coordinates": [
 		[0, 0],
 		[0, 1],
 		[0, 2],
+		[1, 2]
+		]
+    },   
+	{
+      "name": "U",
+      "type": "additional",
+	  "coordinates": [
+		[0, 0],
+		[0, 1],
+		[1, 1],
+		[2, 1],
+		[2, 0]
+		]
+    },   
+	{
+      "name": "X",
+      "type": "additional",
+	  "coordinates": [
+		[1, 0],
+		[0, 1],
+		[1, 1],
+		[2, 1],
+		[1, 2]
+		]
+    },   
+	{
+      "name": "I5",
+      "type": "additional",
+	  "coordinates": [
+		[2, 0],
+		[2, 1],
+		[2, 2],
+		[2, 3],
+		[2, 4]
+		]
+    }, 
+	{
+      "name": "Z5",
+      "type": "additional",
+	  "coordinates": [
+		[0, 0],
+		[1, 0],
+		[1, 1],
+		[1, 2],
+		[2, 2]
+		]
+    },
+	{
+      "name": "T5",
+      "type": "additional",
+	  "coordinates": [
+		[0, 0],
+		[1, 0],
+		[2, 0],
+		[1, 1],
+		[1, 2]
+		]
+    },  
+	{
+      "name": "V5",
+      "type": "additional",
+	  "coordinates": [
+		[0, 0],
+		[0, 1],
+		[0, 2],
+		[1, 2],
+		[2, 2]
+		]
+    }
+	{
+      "name": "F5",
+      "type": "additional",
+	  "coordinates": [
+		[1, 0],
+		[2, 0],
+		[0, 1],
+		[1, 1],
 		[1, 2]
 		]
     }   
