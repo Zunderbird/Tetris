@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System;
+using System.Linq;
 
 namespace Assets.MVC.Model
 {
@@ -9,10 +10,7 @@ namespace Assets.MVC.Model
 
         public List<Point> Blocks
         {
-            get
-            {
-                return new List<Point>(_mShapeBlocks);
-            }
+            get { return new List<Point>(_mShapeBlocks);}
         }
 
         public int HexColor { get; set; }
@@ -22,7 +20,7 @@ namespace Assets.MVC.Model
             _mShapeBlocks = new List<Point>();
         }
 
-        public TetrisShape(List<Point> shapeBlocks)
+        public TetrisShape(IEnumerable<Point> shapeBlocks)
         {
             _mShapeBlocks = new List<Point>(shapeBlocks);
         }
@@ -35,30 +33,12 @@ namespace Assets.MVC.Model
 
         public int Width
         {
-            get
-            {
-                var width = 0;
-
-                foreach (var point in _mShapeBlocks)
-                {
-                    width = Math.Max(width, point.X);
-                }
-                return width;
-            }
+            get { return _mShapeBlocks.Max(n => n.X); }
         }
 
         public int Height
         {
-            get
-            {
-                int height = 0;
-
-                foreach (var point in _mShapeBlocks)
-                {
-                    height = Math.Max(height, point.Y);
-                }
-                return height;
-            }
+            get { return _mShapeBlocks.Max(n => n.Y);}
         }
 
         private void AddBlock(Point shapeParticle)

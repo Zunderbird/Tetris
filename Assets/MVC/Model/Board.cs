@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Assets.MVC.Model
 {
@@ -30,62 +31,40 @@ namespace Assets.MVC.Model
 
         public Point CurrentShapeCoord
         {
-            get
-            {
-                return _mCurrentShapeCoord;
-            }
-            set
-            {
-                _mCurrentShapeCoord = new Point(value);
-            }
+            get { return _mCurrentShapeCoord; }
+            set { _mCurrentShapeCoord = new Point(value); }
         }
 
         private int this[Point point]
         {
-            get
-            {
-                return _mTetrisLines[point.Y][point.X];
-            }
-            set
-            {
-                _mTetrisLines[point.Y][point.X] = value;
-            }
+            get { return _mTetrisLines[point.Y][point.X]; }
+            set { _mTetrisLines[point.Y][point.X] = value; }
         }
 
         public List<int> AttachShape(TetrisShape shape)
         {
-            var collectedLine = new List<int>();
-
-            foreach (var block in shape.Blocks)
-            {
-                var coord = new Point(_mCurrentShapeCoord + block);
-
-                if (coord.Y < Height)
+            var collectedLine = shape.Blocks
+                .Select(block => _mCurrentShapeCoord + block)
+                .Where(coord => coord.Y < Height)
+                .Where(coord =>
                 {
                     this[coord] = 1;
-                    _mLinesCount[coord.Y] += 1;
+                    return (++_mLinesCount[coord.Y] == Width);
+                })
+                .Select(coord => coord.Y)
+                .ToList();
 
-                    if (_mLinesCount[coord.Y] == Width)
-                    {
-                        collectedLine.Add(coord.Y);
-                    }
-                }
-            }
             collectedLine.Sort();
             return collectedLine;
         }
 
         public bool CheckShapeOffset(TetrisShape shape, Point offset)
         {
-            foreach (var block in shape.Blocks)
-            {
-                var coord = _mCurrentShapeCoord + block + offset;
-
-                if (coord.X >= 0 && coord.X <= Width - 1 && coord.Y >= 0)
-                    if (coord.Y >= Height || this[coord] == 0) continue;
-                return false;
-            }
-            return true;
+            return !shape.Blocks
+                .Select(block => _mCurrentShapeCoord + block + offset)
+                .Any(coord => coord.X < 0 || coord.X > Width - 1 ||
+                              coord.Y < 0 || coord.Y < Height &&
+                              this[coord] != 0);
         }
 
         public void DestroyLine(int lineIndex)

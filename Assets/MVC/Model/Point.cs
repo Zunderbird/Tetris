@@ -4,31 +4,19 @@
     {
         public static readonly Point Empty = new Point();
 
-        private int _mX;
-        private int _mY;
+        public int X { get; set; }
+        public int Y { get; set; }
 
         public Point(int x, int y)
         {
-            _mX = x;
-            _mY = y;
+            X = x;
+            Y = y;
         }
 
         public Point(Point previousPoint)
         {
-            _mX = previousPoint.X;
-            _mY = previousPoint.Y;
-        }
-
-        public int X
-        {
-            get { return _mX; }
-            set { _mX = value; }
-        }
-
-        public int Y
-        {
-            get { return _mY; }
-            set { _mY = value; }
+            X = previousPoint.X;
+            Y = previousPoint.Y;
         }
 
         public bool IsEmpty

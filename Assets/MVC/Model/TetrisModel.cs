@@ -17,13 +17,14 @@ namespace Assets.MVC.Model
         public int CollectedCount { get; private set; }
 
         public delegate void MovementEvent(MovementEventArgs e);
+        public delegate void DroppingEvent(DroppingEventArgs e);
         public event MovementEvent MovementDone;
         public event EventHandler RotateDone;
         public event EventHandler ShapeIsAdded;
         public event EventHandler ShapeIsAttached;
         public event EventHandler LineIsCollected;
         public event EventHandler GameOver;
-        public event EventHandler ShapeIsDropping;
+        public event DroppingEvent ShapeIsDropping;
 
         public TetrisModel(int width, int height)
         {
@@ -37,6 +38,15 @@ namespace Assets.MVC.Model
             AddShape();
 
             _mCollectedLine = new List<int>();
+        }
+        public int BoardWidth
+        {
+            get { return _mBoard.Width; }
+        }
+
+        public int BoardHeight
+        {
+            get { return _mBoard.Height; }
         }
 
         public TetrisShape NextShape
@@ -101,40 +111,40 @@ namespace Assets.MVC.Model
             var isMovementDone = IsMovementDone(offset, moveDirection);
             if (isMovementDone)
             {
-                var eventArg = new MovementEventArgs();
-                eventArg.MoveDirect = moveDirection;
-                MovementDone(eventArg);
+                if (MovementDone != null) MovementDone(new MovementEventArgs(moveDirection));
             }
             return isMovementDone;
         }
 
         public void DropShape()
         {
-            while (MoveShape(MoveDirection.Down) == true)
+            var counter = 0;
+            while (MoveShape(MoveDirection.Down))
             {
-                ShapeIsDropping(this, EventArgs.Empty);
+                counter++;
             }
+            if (ShapeIsDropping != null) ShapeIsDropping(new DroppingEventArgs(counter));
         }
 
         public void RotateShape(RotateDirection rotateDirection)
         {
             var shape = _mCurrentShape.Rotate(rotateDirection);
 
-            if (_mBoard.CheckShapeOffset(shape, new Point(0, 0)) == true)
+            if (_mBoard.CheckShapeOffset(shape, new Point(0, 0)))
             {
                 _mCurrentShape = shape;
-                RotateDone(this, EventArgs.Empty);
+                if (RotateDone != null) RotateDone(this, EventArgs.Empty);
             }
         }
 
         private bool IsMovementDone(Point offset, MoveDirection moveDirection)
         {
-            if (_mBoard.CheckShapeOffset(_mCurrentShape, offset) == true)
+            if (_mBoard.CheckShapeOffset(_mCurrentShape, offset))
             {
                 _mBoard.CurrentShapeCoord += offset;
                 return true;
             }
-            else if (moveDirection == MoveDirection.Down)
+            if (moveDirection == MoveDirection.Down)
             {
                 FinishMovement();
             }
@@ -144,22 +154,22 @@ namespace Assets.MVC.Model
         private void FinishMovement()
         {
             _mCollectedLine = _mBoard.AttachShape(_mCurrentShape);
-            ShapeIsAttached(this, EventArgs.Empty);
+            if (ShapeIsAttached != null) ShapeIsAttached(this, EventArgs.Empty);
 
             DestroyCollectedLines();
 
-            if (AddShape() == true)
+            if (AddShape())
             {
-                ShapeIsAdded(this, EventArgs.Empty);
+                if (ShapeIsAdded != null) ShapeIsAdded(this, EventArgs.Empty);
             }
-            else GameOver(this, EventArgs.Empty);
+            else if (GameOver != null) GameOver(this, EventArgs.Empty);
         }
 
         private void DestroyCollectedLines()
         {
             while (_mCollectedLine.Count > 0)
             {
-                LineIsCollected(this, EventArgs.Empty);
+                if (LineIsCollected != null) LineIsCollected(this, EventArgs.Empty);
                 GaineScorePoints();
                 _mBoard.DestroyLine(_mCollectedLine[_mCollectedLine.Count - 1]);
                 _mCollectedLine.RemoveAt(_mCollectedLine.Count - 1);

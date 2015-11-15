@@ -13,8 +13,9 @@ namespace Assets.MVC.View
 
         public TetrisView(TetrisModel iModel)
         {
-            _mShapeHeap = new GameObject("ShapeHeap");
             _mModel = iModel;
+
+            _mShapeHeap = new GameObject("ShapeHeap");
 
             _mModel.MovementDone += OnMovementDone;
             _mModel.RotateDone += OnRotateDone;
@@ -176,11 +177,11 @@ namespace Assets.MVC.View
         private void OnGameOver(object sender, EventArgs e)
         {
             Debug.Log("Game Over!");
+            Application.LoadLevel("MainMenu");
         }
 
-        private void OnShapeIsDropping(object sender, EventArgs e)
+        private void OnShapeIsDropping(DroppingEventArgs e)
         {
-            Debug.Log("drop");
         }
     }
 
