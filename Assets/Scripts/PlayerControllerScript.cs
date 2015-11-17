@@ -34,15 +34,17 @@ namespace Assets.Scripts
               
             _model = new TetrisModel(10, 24);
 
-            var view = new TetrisView(_model);
-
             _controller = new Controller(_model);
+
+            var view = new TetrisView(_model, _controller);
 
             MuteToggle.onValueChanged.AddListener(isMute => BackgroundMusic.mute = isMute);
         }
 
         void Update()
         {
+            if (_model.IsOnPause) return;
+
             if (Input.GetButtonDown("Drop"))  _controller.DropTrigger(); 
 
             if (Input.GetButtonDown("Down")) _controller.MoveTrigger(MoveDirection.Down);

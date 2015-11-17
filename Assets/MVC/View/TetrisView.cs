@@ -1,29 +1,48 @@
 ﻿using UnityEngine;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Assets.MVC.Model;
+using DG.Tweening;
 
 namespace Assets.MVC.View
 {
-    public class TetrisView : ITetrisView
+    public class TetrisView
     {
-        private GameObject _mCurrentShape;
-        private GameObject _mNextShape;
-        private readonly GameObject _mShapeHeap;
-        private readonly TetrisModel _mModel;
+        private static GameObject _block;
+        private static GameObject _board;
 
-        public TetrisView(TetrisModel iModel)
+        private const float BLOCK_SIZE = 0.5f;
+        private const float X_CORRECTION = 2.25f;
+        private const float Y_CORRECTION = 5.25f;
+        private readonly static Vector2 Centre = new Vector2(3.75f, 3.75f);
+
+        private GameObject _currentShape;
+        private GameObject _nextShape;
+        private List<Transform> _animationObjects; 
+        
+        private readonly List<GameObject> _lines; 
+        private readonly TetrisModel _model;
+        private readonly Controller.Controller _controller;
+
+        public TetrisView(TetrisModel iModel, Controller.Controller controller)
         {
-            _mModel = iModel;
+            _model = iModel;
+            _controller = controller;
 
-            _mShapeHeap = new GameObject("ShapeHeap");
+            _block = (GameObject) Resources.Load("block");
+            _board = (GameObject) Resources.Load("Board");
 
-            _mModel.MovementDone += OnMovementDone;
-            _mModel.RotateDone += OnRotateDone;
-            _mModel.ShapeIsAdded += OnShapeIsAdded;
-            _mModel.ShapeIsAttached += OnShapeIsAttached;
-            _mModel.LineIsCollected += OnLineIsCollected;
-            _mModel.GameOver += OnGameOver;
-            _mModel.ShapeIsDropping += OnShapeIsDropping;
+            _lines = new List<GameObject>();
+
+            _model.MovementDone += OnMovementDone;
+            _model.RotateDone += OnRotateDone;
+            _model.ShapeAdded += OnShapeAdded;
+            _model.LineDestroyed += OnLineDestroyed;
+            _model.GameOver += OnGameOver;
+            _model.ShapeDropping += OnShapeDropping;
+            _model.ShapeIsAttachedAddListener(OnShapeIsAttached);
+            _model.BlockIsAttachedAddListener(OnAttachedBlock);
 
             NewGame();
         }
@@ -31,88 +50,90 @@ namespace Assets.MVC.View
         private void NewGame()
         {
             DisplayBoard();
-            DisplayNextShape(_mModel.NextShape);
-            SpawnShape(_mModel.CurrentShape, _mModel.CurrentShapeCoord);
+            DisplayNextShape(_model.NextShape);
+            SpawnShape(_model.CurrentShape, _model.CurrentShapeCoord);
         }
 
         public void DisplayBoard()
         {
-            var board = UnityEngine.Object.Instantiate((GameObject)Resources.Load("Board"));
-            board.transform.position = new Vector3(0f, 0f);
+            var board = UnityEngine.Object.Instantiate(_board);
+            board.transform.position = Vector3.zero;
+
+            for (var i = 0; i < _model.BoardHeight; i++)
+            {
+                _lines.Add(new GameObject("Line " + i));
+                _lines[i].transform.parent = board.transform;
+                _lines[i].transform.position += _lines[i].transform.up*(BLOCK_SIZE*i - Y_CORRECTION);
+            }
         }
 
         public void SpawnShape(TetrisShape shape, Point spawnCoord)
         {
-            _mCurrentShape = CreateShape(shape);
-            _mCurrentShape.transform.position = new Vector2(spawnCoord.X * 0.5f - 2.25f, spawnCoord.Y * 0.5f - 5.25f);
+            _currentShape = CreateShape(shape);
+            _currentShape.transform.position = new Vector2(spawnCoord.X * BLOCK_SIZE - X_CORRECTION, spawnCoord.Y * BLOCK_SIZE - Y_CORRECTION);
         }
 
         public void PaintShape(Color color)
         {
-            foreach (Transform block in _mCurrentShape.transform)
+            foreach (Transform block in _currentShape.transform)
             {
                 block.GetComponent<SpriteRenderer>().color = color;
             }
         }
 
-        public void MoveShape(MoveDirection moveDirection)
+        public static void MoveObject(Point moveVector, GameObject gameObject)
         {
-            switch (moveDirection)
-            {
-                case MoveDirection.Right:
-                    {
-                        _mCurrentShape.transform.position += _mCurrentShape.transform.right * (0.5f);
-                    }
-                    break;
-                case MoveDirection.Left:
-                    {
-                        _mCurrentShape.transform.position += _mCurrentShape.transform.right * (-0.5f);
-                    }
-                    break;
-                case MoveDirection.Up:
-                    {
-                        _mCurrentShape.transform.position += _mCurrentShape.transform.up * (0.5f);
-                    }
-                    break;
-                case MoveDirection.Down:
-                    {
-                        _mCurrentShape.transform.position += _mCurrentShape.transform.up * (-0.5f);
-                    }
-                    break;
-            }
+            gameObject.transform.position += new Vector3(moveVector.X, moveVector.Y) * BLOCK_SIZE;
         }
 
         public void RotateShape(TetrisShape shape)
         {
-            Vector2 currentShapePosition = _mCurrentShape.transform.position;
+            Vector2 currentShapePosition = _currentShape.transform.position;
 
-            UnityEngine.Object.Destroy(_mCurrentShape);
+            UnityEngine.Object.Destroy(_currentShape);
 
-            _mCurrentShape = CreateShape(shape);
-            _mCurrentShape.transform.position = currentShapePosition;
-
+            _currentShape = CreateShape(shape);
+            _currentShape.transform.position = currentShapePosition;
         }
 
-        public void DestroyLine(int number)
+        private void DestroyLine(int number)
         {
-            foreach (Transform block in _mShapeHeap.transform)
+            foreach (Transform block in _lines[number].transform)
             {
-                if (block.transform.position.y == 0.5f * number - 5.25f)
+                UnityEngine.Object.Destroy(block.gameObject);
+            }
+        }
+
+        private void DropBlocks(int startBlockIndex)
+        {
+            _animationObjects = new List<Transform>();
+            _controller.DropBlockAnimationStart();
+
+            for (var i = startBlockIndex + 1; i < _model.BoardHeight; i++)
+            {
+                while (_lines[i].transform.childCount > 0)
                 {
-                    UnityEngine.Object.Destroy(block.gameObject);
-                }
-                else if (block.transform.position.y > 0.5f * number - 5.25f)
-                {
-                    block.transform.position += block.transform.up * (-0.5f);
+                    var block = _lines[i].transform.GetChild(0);
+                    block.SetParent(_lines[i - 1].transform, true);
+
+                    _animationObjects.Add(block);
+
+                    block.DOMoveY(block.transform.position.y - BLOCK_SIZE, 0.25f)
+                        .OnComplete(() => AnimationCompleted(block));
                 }
             }
         }
 
+        private void AnimationCompleted(UnityEngine.Object animatedObject)
+        {
+            if (_animationObjects.Last() == animatedObject) _controller.DropBlocksAnimationEnded();
+        }
+
         public void DisplayNextShape(TetrisShape shape)
         {
-            UnityEngine.Object.Destroy(_mNextShape);
-            _mNextShape = CreateShape(shape);
-            _mNextShape.transform.position = new Vector2(3.75f, 3.75f);
+            UnityEngine.Object.Destroy(_nextShape);
+            _nextShape = CreateShape(shape);
+            _nextShape.transform.position = Centre;
         }
 
         public void DisplayGameOver()
@@ -131,47 +152,44 @@ namespace Assets.MVC.View
                 float x = block.X;
                 float y = block.Y;
 
-                var localVar = UnityEngine.Object.Instantiate((GameObject)Resources.Load("block"));
+                var localVar = UnityEngine.Object.Instantiate(_block);
                 localVar.transform.parent = shape.transform;
-                localVar.transform.position = new Vector2(x * 0.5f, y * 0.5f);
+                localVar.transform.position = new Vector2(x * BLOCK_SIZE, y * BLOCK_SIZE);
                 localVar.GetComponent<SpriteRenderer>().color = color;
             }
             return shape;
         }
 
-        private void AttachShape()
+        private void OnAttachedBlock(int x, int y)
         {
-            while (_mCurrentShape.transform.childCount > 0)
-            {
-                _mCurrentShape.transform.GetChild(0).transform.parent = _mShapeHeap.transform;
-            }
-            UnityEngine.Object.Destroy(_mCurrentShape);
+            _currentShape.transform.GetChild(0).transform.parent = _lines[y].transform;
         }
 
-        private void OnMovementDone(MovementEventArgs e)
+        private void OnMovementDone(object sender, MovementEventArgs e)
         {
-            MoveShape(e.MoveDirect);
+            MoveObject(e.MoveVector, _currentShape);
         }
 
         private void OnRotateDone(object sender, EventArgs e)
         {
-            RotateShape(_mModel.CurrentShape);
+            RotateShape(_model.CurrentShape);
         }
 
-        private void OnShapeIsAdded(object sender, EventArgs e)
+        private void OnShapeAdded(object sender, EventArgs e)
         {
-            DisplayNextShape(_mModel.NextShape);
-            SpawnShape(_mModel.CurrentShape, _mModel.CurrentShapeCoord);
+            DisplayNextShape(_model.NextShape);
+            SpawnShape(_model.CurrentShape, _model.CurrentShapeCoord);
         }
 
         private void OnShapeIsAttached(object sender, EventArgs e)
         {
-            AttachShape();
+            UnityEngine.Object.Destroy(_currentShape);
         }
 
-        private void OnLineIsCollected(object sender, EventArgs e)
+        private void OnLineDestroyed(object sender, LineIndexEventArgs e)
         {
-            DestroyLine(_mModel.CollectedLine[_mModel.CollectedLine.Count - 1]);
+            DestroyLine(e.LineIndex);
+            DropBlocks(e.LineIndex);
         }
 
         private void OnGameOver(object sender, EventArgs e)
@@ -180,7 +198,7 @@ namespace Assets.MVC.View
             Application.LoadLevel("MainMenu");
         }
 
-        private void OnShapeIsDropping(DroppingEventArgs e)
+        private void OnShapeDropping(object sender, DroppingEventArgs e)
         {
         }
     }

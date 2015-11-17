@@ -4,11 +4,11 @@ namespace Assets.MVC.Model
 {
     public class MovementEventArgs : EventArgs
     {
-        public MoveDirection MoveDirect { get; set; }
+        public Point MoveVector { get; set; }
 
-        public MovementEventArgs(MoveDirection moveDirection)
+        public MovementEventArgs(Point moveVector)
         {
-            MoveDirect = moveDirection;
+            MoveVector = moveVector;
         }
     }
 
@@ -19,6 +19,28 @@ namespace Assets.MVC.Model
         public DroppingEventArgs(int distance)
         {
             Distance = distance;
+        }
+    }
+
+    public class CoordEventArgs : EventArgs
+    {
+        public int X { get; set; }
+        public int Y { get; set; }
+
+        public CoordEventArgs(int x, int y)
+        {
+            X = x;
+            Y = y;
+        }
+    }
+
+    public class LineIndexEventArgs : EventArgs
+    {
+        public int LineIndex;
+
+        public LineIndexEventArgs(int lineIndex)
+        {
+            LineIndex = lineIndex;
         }
     }
 }

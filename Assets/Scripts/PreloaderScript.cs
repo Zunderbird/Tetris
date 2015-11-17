@@ -7,7 +7,7 @@ namespace Assets.Scripts
     {
         void Start()
         {
-            JsonReader.LoadResources();          
+            JsonReader.LoadResources();      
         }
     }
 }

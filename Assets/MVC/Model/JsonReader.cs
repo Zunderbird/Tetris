@@ -23,6 +23,31 @@ namespace Assets.MVC.Model
             return true;
         }
 
+        public static List<TetrisShape> GetShapes(string type)
+        {
+            var shapesCount = Shapes["shapes"].Count;
+            var shapes = new List<TetrisShape>();
+
+            for (var i = 0; i < shapesCount; i++)
+            {
+                if (type.Equals(Shapes["shapes"][i]["type"]))
+                    shapes.Add(GetShape(i));
+            }
+            return shapes;
+        }
+
+        public static List<int> GetColors()
+        {
+            var colorCount = Colors["colors"].Count;
+            var colors = new List<int>();
+
+            for (var i = 0; i < colorCount; i++)
+            {
+                colors.Add(GetColor(i));
+            }
+            return colors;
+        }
+
         public static TetrisShape GetShape(int shapeIndex)
         {
             var shapeParticleCount = Shapes["shapes"][shapeIndex]["coordinates"].Count;

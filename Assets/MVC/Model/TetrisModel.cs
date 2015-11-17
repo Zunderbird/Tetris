@@ -5,26 +5,49 @@ namespace Assets.MVC.Model
 {
     public class TetrisModel
     {
-        private readonly Board _mBoard;
+        private readonly Board _board;
 
-        private TetrisShape _mCurrentShape;
-        private TetrisShape _mNextShape;
+        private TetrisShape _currentShape;
+        private TetrisShape _nextShape;
 
-        private List<int> _mCollectedLine;
+        private List<int> _collectedLine;
+        private bool _isOnPause;
 
-        public int Level { get; set; }
+        public int Level { get; set; } 
         public int Score { get; private set; }
         public int CollectedCount { get; private set; }
+        public const int COLLECT_TO_NEXT_LEVEL = 4;
 
-        public delegate void MovementEvent(MovementEventArgs e);
-        public delegate void DroppingEvent(DroppingEventArgs e);
+        public delegate void MovementEvent(object sender, MovementEventArgs e);
         public event MovementEvent MovementDone;
+
+        public delegate void DroppingEvent(object sender, DroppingEventArgs e);
+        public event DroppingEvent ShapeDropping;
+
+        public delegate void DestroyingEvent(object sender, LineIndexEventArgs e);
+        public event DestroyingEvent LineDestroyed;
+
         public event EventHandler RotateDone;
-        public event EventHandler ShapeIsAdded;
-        public event EventHandler ShapeIsAttached;
-        public event EventHandler LineIsCollected;
+        public event EventHandler ShapeAdded;
         public event EventHandler GameOver;
-        public event DroppingEvent ShapeIsDropping;
+
+        private readonly Dictionary<MoveDirection, Point> _offsets = new Dictionary<MoveDirection, Point>
+            {
+                { MoveDirection.Right, new Point(1, 0) },
+                { MoveDirection.Left, new Point(-1, 0) },
+                { MoveDirection.Up, new Point(0, 1) },
+                { MoveDirection.Down, new Point(0, -1) },
+            };
+
+        public bool IsOnPause
+        {
+            get { return _isOnPause; }
+            set
+            {
+                _isOnPause = value;
+                if (_isOnPause == false) FinishMovement();
+            }            
+        }
 
         public TetrisModel(int width, int height)
         {
@@ -32,41 +55,47 @@ namespace Assets.MVC.Model
             CollectedCount = 0;
             Level = 1;
 
-            _mBoard = new Board(width, height);
+            _board = new Board(width, height);
 
-            _mNextShape = GenerateNextShape();
-            AddShape();
+            _nextShape = GenerateNextShape();
+            TryToAddShape();
 
-            _mCollectedLine = new List<int>();
+            _collectedLine = new List<int>();
         }
+
         public int BoardWidth
         {
-            get { return _mBoard.Width; }
+            get { return _board.Width; }
         }
 
         public int BoardHeight
         {
-            get { return _mBoard.Height; }
+            get { return _board.Height; }
         }
 
         public TetrisShape NextShape
         {
-            get { return new TetrisShape(_mNextShape); }
+            get { return new TetrisShape(_nextShape); }
         }
 
         public TetrisShape CurrentShape
         {
-            get { return new TetrisShape(_mCurrentShape); }
+            get { return new TetrisShape(_currentShape); }
         }
 
         public Point CurrentShapeCoord
         {
-            get { return new Point(_mBoard.CurrentShapeCoord); }
+            get { return new Point(_board.CurrentShapeCoord); }
         }
 
-        public List<int> CollectedLine
+        public void BlockIsAttachedAddListener(Action<int, int> action)
         {
-            get { return new List<int>(_mCollectedLine); }
+            _board.BlockIsAttached += (sender, coord) => action(coord.X, coord.Y);
+        }
+
+        public void ShapeIsAttachedAddListener(Action<object, EventArgs> action)
+        {
+            _board.ShapeIsAttached += (sender, arg) => action(sender, arg);
         }
 
         private TetrisShape GenerateNextShape()
@@ -76,44 +105,30 @@ namespace Assets.MVC.Model
             return newShape;
         }
 
-        private bool AddShape()
+        private bool TryToAddShape()
         {
-            _mCurrentShape = _mNextShape;
-            _mNextShape = GenerateNextShape();
-            _mBoard.CurrentShapeCoord = new Point((_mBoard.Width - _mCurrentShape.Width) / 2, _mBoard.Height - _mCurrentShape.Height - 2);
-            return _mBoard.CheckShapeOffset(_mCurrentShape, new Point(0, 0));
+            _currentShape = _nextShape;
+            _nextShape = GenerateNextShape();
+            _board.CurrentShapeCoord = new Point((_board.Width - _currentShape.Width) / 2, _board.Height - _currentShape.Height - 2);
+            return _board.CheckShapeOffset(_currentShape, new Point(0, 0));
         }
 
         public bool MoveShape(MoveDirection moveDirection)
         {
-            Point offset;
+            var offset = _offsets[moveDirection];
 
-            switch (moveDirection)
+            if (_board.CheckShapeOffset(_currentShape, offset))
             {
-                case MoveDirection.Left:
-                    {
-                        offset = new Point(-1, 0);
-                    }
-                    break;
-                case MoveDirection.Right:
-                    {
-                        offset = new Point(1, 0);
-                    }
-                    break;
-                case MoveDirection.Down:
-                    {
-                        offset = new Point(0, -1);
-                    }
-                    break;
-                default: return false;
+                _board.CurrentShapeCoord += offset;
+                if (MovementDone != null) MovementDone(this, new MovementEventArgs(offset));
+                return true;
             }
-
-            var isMovementDone = IsMovementDone(offset, moveDirection);
-            if (isMovementDone)
+            if (moveDirection == MoveDirection.Down)
             {
-                if (MovementDone != null) MovementDone(new MovementEventArgs(moveDirection));
+                _collectedLine = _board.AttachShape(_currentShape);
+                FinishMovement();
             }
-            return isMovementDone;
+            return false;
         }
 
         public void DropShape()
@@ -123,67 +138,57 @@ namespace Assets.MVC.Model
             {
                 counter++;
             }
-            if (ShapeIsDropping != null) ShapeIsDropping(new DroppingEventArgs(counter));
+            if (ShapeDropping != null) ShapeDropping(this, new DroppingEventArgs(counter));
         }
 
         public void RotateShape(RotateDirection rotateDirection)
         {
-            var shape = _mCurrentShape.Rotate(rotateDirection);
+            var shape = _currentShape.Rotate(rotateDirection);
 
-            if (_mBoard.CheckShapeOffset(shape, new Point(0, 0)))
+            if (_board.CheckShapeOffset(shape, new Point(0, 0)))
             {
-                _mCurrentShape = shape;
+                _currentShape = shape;
                 if (RotateDone != null) RotateDone(this, EventArgs.Empty);
             }
         }
 
-        private bool IsMovementDone(Point offset, MoveDirection moveDirection)
+        public void FinishMovement()
         {
-            if (_mBoard.CheckShapeOffset(_mCurrentShape, offset))
+            if (_collectedLine.Count == 0)
             {
-                _mBoard.CurrentShapeCoord += offset;
-                return true;
+                if (TryToAddShape())
+                {
+                    if (ShapeAdded != null) ShapeAdded(this, EventArgs.Empty);
+                }
+                else if (GameOver != null) GameOver(this, EventArgs.Empty);
             }
-            if (moveDirection == MoveDirection.Down)
+            else
             {
-                FinishMovement();
+                DestroyFirstCollectedLine();
             }
-            return false;
         }
 
-        private void FinishMovement()
+        public bool DestroyFirstCollectedLine()
         {
-            _mCollectedLine = _mBoard.AttachShape(_mCurrentShape);
-            if (ShapeIsAttached != null) ShapeIsAttached(this, EventArgs.Empty);
+            if (_collectedLine.Count == 0) return true;
 
-            DestroyCollectedLines();
+            var lineIndex = _collectedLine[_collectedLine.Count - 1];
+            if (LineDestroyed != null) LineDestroyed(this, new LineIndexEventArgs(lineIndex));
 
-            if (AddShape())
-            {
-                if (ShapeIsAdded != null) ShapeIsAdded(this, EventArgs.Empty);
-            }
-            else if (GameOver != null) GameOver(this, EventArgs.Empty);
-        }
+            GaineScorePoints();
 
-        private void DestroyCollectedLines()
-        {
-            while (_mCollectedLine.Count > 0)
-            {
-                if (LineIsCollected != null) LineIsCollected(this, EventArgs.Empty);
-                GaineScorePoints();
-                _mBoard.DestroyLine(_mCollectedLine[_mCollectedLine.Count - 1]);
-                _mCollectedLine.RemoveAt(_mCollectedLine.Count - 1);
-            }
+            _board.DestroyLine(lineIndex);
+            _collectedLine.RemoveAt(_collectedLine.Count - 1);
+
+            return (_collectedLine.Count == 0);
         }
 
         private void GaineScorePoints()
         {
-            const int collectedToNextLevel = 4;
-
             Score += Level;
             CollectedCount += 1;
 
-            if (CollectedCount % collectedToNextLevel == 0) LevelUp();
+            if (CollectedCount % COLLECT_TO_NEXT_LEVEL == 0) LevelUp();
         }
 
         private void LevelUp()
