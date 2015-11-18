@@ -18,7 +18,7 @@ namespace Assets.MVC.Controller
 
         public void MoveTrigger(MoveDirection direction)
         {
-            _model.MoveShape(direction);
+            _model.MoveShape(direction, true);
         }
 
         public void DropTrigger()
@@ -26,13 +26,25 @@ namespace Assets.MVC.Controller
             _model.DropShape();
         }
 
-        public void DropBlockAnimationStart()
+        public void DroppingBlocksAnimationStart()
         {
             _model.IsOnPause = true;
         }
 
-        public void DropBlocksAnimationEnded()
+        public void DroppingBlocksAnimationEnded()
         {
+            _model.IsOnPause = false;
+        }
+
+        public void DroppingShapeAnimationStart()
+        {
+            _model.IsOnPause = true;
+        }
+
+        public void DroppingShapeAnimationEnded()
+        {
+            //UnityEngine.Debug.Log("Animation Ended");
+            _model.AttachShape();
             _model.IsOnPause = false;
         }
 

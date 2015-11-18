@@ -13,9 +13,11 @@ namespace Assets.MVC.Model
         private List<int> _collectedLine;
         private bool _isOnPause;
 
+        public string PlayerName { get; private set; }
         public int Level { get; set; } 
         public int Score { get; private set; }
         public int CollectedCount { get; private set; }
+
         public const int COLLECT_TO_NEXT_LEVEL = 4;
 
         public delegate void MovementEvent(object sender, MovementEventArgs e);
@@ -44,13 +46,16 @@ namespace Assets.MVC.Model
             get { return _isOnPause; }
             set
             {
+                //UnityEngine.Debug.Log("Is on pause changed, was " + _isOnPause + ", now it's " + value);
                 _isOnPause = value;
                 if (_isOnPause == false) FinishMovement();
             }            
         }
 
-        public TetrisModel(int width, int height)
+        public TetrisModel(int width, int height, string playerIndex)
         {
+            PlayerName = playerIndex;
+
             Score = 0;
             CollectedCount = 0;
             Level = 1;
@@ -88,9 +93,9 @@ namespace Assets.MVC.Model
             get { return new Point(_board.CurrentShapeCoord); }
         }
 
-        public void BlockIsAttachedAddListener(Action<int, int> action)
+        public void BlockIsAttachedAddListener(Action<object, int, int> action)
         {
-            _board.BlockIsAttached += (sender, coord) => action(coord.X, coord.Y);
+            _board.BlockIsAttached += (sender, coord) => action(sender, coord.X, coord.Y);
         }
 
         public void ShapeIsAttachedAddListener(Action<object, EventArgs> action)
@@ -113,32 +118,46 @@ namespace Assets.MVC.Model
             return _board.CheckShapeOffset(_currentShape, new Point(0, 0));
         }
 
-        public bool MoveShape(MoveDirection moveDirection)
+        public bool MoveShape(MoveDirection moveDirection, bool broadcastEvent)
         {
+            if (_isOnPause) return false;
             var offset = _offsets[moveDirection];
 
             if (_board.CheckShapeOffset(_currentShape, offset))
             {
                 _board.CurrentShapeCoord += offset;
-                if (MovementDone != null) MovementDone(this, new MovementEventArgs(offset));
+
+                if (broadcastEvent && MovementDone != null)
+                    MovementDone(this, new MovementEventArgs(offset));
+
                 return true;
             }
             if (moveDirection == MoveDirection.Down)
             {
-                _collectedLine = _board.AttachShape(_currentShape);
-                FinishMovement();
+                if (broadcastEvent)
+                {
+                    //UnityEngine.Debug.Log("simple moving down");
+                    AttachShape();
+                    FinishMovement();
+                }    
             }
             return false;
         }
 
         public void DropShape()
         {
-            var counter = 0;
-            while (MoveShape(MoveDirection.Down))
+            var counter = 0; 
+            while (MoveShape(MoveDirection.Down, false))
             {
                 counter++;
-            }
+            }          
             if (ShapeDropping != null) ShapeDropping(this, new DroppingEventArgs(counter));
+        }
+
+        public void AttachShape()
+        {
+            _collectedLine = _board.AttachShape(_currentShape);
+            //UnityEngine.Debug.Log("Attached, Collected lines: " + _collectedLine.Count);
         }
 
         public void RotateShape(RotateDirection rotateDirection)
@@ -153,7 +172,7 @@ namespace Assets.MVC.Model
         }
 
         public void FinishMovement()
-        {
+        {         
             if (_collectedLine.Count == 0)
             {
                 if (TryToAddShape())
@@ -172,7 +191,7 @@ namespace Assets.MVC.Model
         {
             if (_collectedLine.Count == 0) return true;
 
-            var lineIndex = _collectedLine[_collectedLine.Count - 1];
+            var lineIndex = _collectedLine[_collectedLine.Count - 1];                     
             if (LineDestroyed != null) LineDestroyed(this, new LineIndexEventArgs(lineIndex));
 
             GaineScorePoints();

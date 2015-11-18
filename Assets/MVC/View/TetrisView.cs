@@ -9,13 +9,12 @@ namespace Assets.MVC.View
 {
     public class TetrisView
     {
-        private static GameObject _block;
-        private static GameObject _board;
+        private GameObject _playersBoard;
 
-        private const float BLOCK_SIZE = 0.5f;
         private const float X_CORRECTION = 2.25f;
         private const float Y_CORRECTION = 5.25f;
-        private readonly static Vector2 Centre = new Vector2(3.75f, 3.75f);
+        private readonly static Vector2 NextShapePosition = new Vector2(3.75f, 3.75f);
+        private Vector3 _boardsOffset;
 
         private GameObject _currentShape;
         private GameObject _nextShape;
@@ -25,13 +24,10 @@ namespace Assets.MVC.View
         private readonly TetrisModel _model;
         private readonly Controller.Controller _controller;
 
-        public TetrisView(TetrisModel iModel, Controller.Controller controller)
+        public TetrisView(TetrisModel model, Controller.Controller controller)
         {
-            _model = iModel;
+            _model = model;
             _controller = controller;
-
-            _block = (GameObject) Resources.Load("block");
-            _board = (GameObject) Resources.Load("Board");
 
             _lines = new List<GameObject>();
 
@@ -43,12 +39,11 @@ namespace Assets.MVC.View
             _model.ShapeDropping += OnShapeDropping;
             _model.ShapeIsAttachedAddListener(OnShapeIsAttached);
             _model.BlockIsAttachedAddListener(OnAttachedBlock);
-
-            NewGame();
         }
 
-        private void NewGame()
+        public void NewGame(Vector3 boardsOffset)
         {
+            _boardsOffset = boardsOffset;
             DisplayBoard();
             DisplayNextShape(_model.NextShape);
             SpawnShape(_model.CurrentShape, _model.CurrentShapeCoord);
@@ -56,21 +51,27 @@ namespace Assets.MVC.View
 
         public void DisplayBoard()
         {
-            var board = UnityEngine.Object.Instantiate(_board);
-            board.transform.position = Vector3.zero;
+            _playersBoard = new GameObject("Player " + _model.PlayerName);
+            _playersBoard.transform.position = _boardsOffset;
+
+            var board = UnityEngine.Object.Instantiate((GameObject)Resources.Load("Board"));
+            board.transform.SetParent(_playersBoard.transform, false);
 
             for (var i = 0; i < _model.BoardHeight; i++)
             {
                 _lines.Add(new GameObject("Line " + i));
-                _lines[i].transform.parent = board.transform;
-                _lines[i].transform.position += _lines[i].transform.up*(BLOCK_SIZE*i - Y_CORRECTION);
+                _lines[i].transform.SetParent(board.transform, false);
+                _lines[i].transform.position += _lines[i].transform.up*(ShapeFactory.BLOCK_SIZE*i - Y_CORRECTION);
             }
         }
 
         public void SpawnShape(TetrisShape shape, Point spawnCoord)
         {
-            _currentShape = CreateShape(shape);
-            _currentShape.transform.position = new Vector2(spawnCoord.X * BLOCK_SIZE - X_CORRECTION, spawnCoord.Y * BLOCK_SIZE - Y_CORRECTION);
+            _currentShape = ShapeFactory.CreateShape(shape);
+            _currentShape.transform.position = new Vector2(
+                spawnCoord.X * ShapeFactory.BLOCK_SIZE - X_CORRECTION, 
+                spawnCoord.Y * ShapeFactory.BLOCK_SIZE - Y_CORRECTION);
+            _currentShape.transform.SetParent(_playersBoard.transform, false);
         }
 
         public void PaintShape(Color color)
@@ -81,19 +82,15 @@ namespace Assets.MVC.View
             }
         }
 
-        public static void MoveObject(Point moveVector, GameObject gameObject)
-        {
-            gameObject.transform.position += new Vector3(moveVector.X, moveVector.Y) * BLOCK_SIZE;
-        }
-
         public void RotateShape(TetrisShape shape)
         {
             Vector2 currentShapePosition = _currentShape.transform.position;
 
             UnityEngine.Object.Destroy(_currentShape);
 
-            _currentShape = CreateShape(shape);
+            _currentShape = ShapeFactory.CreateShape(shape);
             _currentShape.transform.position = currentShapePosition;
+            _currentShape.transform.SetParent(_playersBoard.transform);
         }
 
         private void DestroyLine(int number)
@@ -107,7 +104,7 @@ namespace Assets.MVC.View
         private void DropBlocks(int startBlockIndex)
         {
             _animationObjects = new List<Transform>();
-            _controller.DropBlockAnimationStart();
+            _controller.DroppingBlocksAnimationStart();
 
             for (var i = startBlockIndex + 1; i < _model.BoardHeight; i++)
             {
@@ -118,7 +115,7 @@ namespace Assets.MVC.View
 
                     _animationObjects.Add(block);
 
-                    block.DOMoveY(block.transform.position.y - BLOCK_SIZE, 0.25f)
+                    block.DOMoveY(block.transform.position.y - ShapeFactory.BLOCK_SIZE, 0.25f)
                         .OnComplete(() => AnimationCompleted(block));
                 }
             }
@@ -126,48 +123,29 @@ namespace Assets.MVC.View
 
         private void AnimationCompleted(UnityEngine.Object animatedObject)
         {
-            if (_animationObjects.Last() == animatedObject) _controller.DropBlocksAnimationEnded();
+            if (_animationObjects.Last() == animatedObject) _controller.DroppingBlocksAnimationEnded();
         }
 
         public void DisplayNextShape(TetrisShape shape)
         {
             UnityEngine.Object.Destroy(_nextShape);
-            _nextShape = CreateShape(shape);
-            _nextShape.transform.position = Centre;
+            _nextShape = ShapeFactory.CreateShape(shape);
+            _nextShape.transform.position = NextShapePosition;
+            _nextShape.transform.SetParent(_playersBoard.transform, false);
         }
 
         public void DisplayGameOver()
         {
         }
 
-        public static GameObject CreateShape(TetrisShape modelShape)
-        {
-            var shape = new GameObject("TetrisShape");
-
-            var hexCode = modelShape.HexColor;
-            var color = hexCode.ToColor();
-
-            foreach (var block in modelShape.Blocks)
-            {
-                float x = block.X;
-                float y = block.Y;
-
-                var localVar = UnityEngine.Object.Instantiate(_block);
-                localVar.transform.parent = shape.transform;
-                localVar.transform.position = new Vector2(x * BLOCK_SIZE, y * BLOCK_SIZE);
-                localVar.GetComponent<SpriteRenderer>().color = color;
-            }
-            return shape;
-        }
-
-        private void OnAttachedBlock(int x, int y)
+        private void OnAttachedBlock(object sender, int x, int y)
         {
             _currentShape.transform.GetChild(0).transform.parent = _lines[y].transform;
         }
 
         private void OnMovementDone(object sender, MovementEventArgs e)
         {
-            MoveObject(e.MoveVector, _currentShape);
+            _currentShape.transform.position += new Vector3(e.MoveVector.X, e.MoveVector.Y) * ShapeFactory.BLOCK_SIZE;
         }
 
         private void OnRotateDone(object sender, EventArgs e)
@@ -200,6 +178,10 @@ namespace Assets.MVC.View
 
         private void OnShapeDropping(object sender, DroppingEventArgs e)
         {
+            _controller.DroppingShapeAnimationStart();
+            //UnityEngine.Debug.Log("Start animation of dropping shape, distance: " + e.Distance);
+            _currentShape.transform.DOMoveY(_currentShape.transform.position.y - ShapeFactory.BLOCK_SIZE*e.Distance, 0.2f)
+                .OnComplete(_controller.DroppingShapeAnimationEnded);
         }
     }
 

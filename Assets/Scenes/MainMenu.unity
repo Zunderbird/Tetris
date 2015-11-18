@@ -456,7 +456,7 @@ GameObject:
   - 222: {fileID: 529319536}
   - 114: {fileID: 529319535}
   m_Layer: 0
-  m_Name: SplashScreenHolder
+  m_Name: MainMenuScreenHolder
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
