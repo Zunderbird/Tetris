@@ -13,7 +13,6 @@ namespace Assets.MVC.Model
         private List<int> _collectedLine;
         private bool _isOnPause;
 
-        public string PlayerName { get; private set; }
         public int Level { get; set; } 
         public int Score { get; private set; }
         public int CollectedCount { get; private set; }
@@ -52,10 +51,8 @@ namespace Assets.MVC.Model
             }            
         }
 
-        public TetrisModel(int width, int height, string playerIndex)
+        public TetrisModel(int width, int height)
         {
-            PlayerName = playerIndex;
-
             Score = 0;
             CollectedCount = 0;
             Level = 1;

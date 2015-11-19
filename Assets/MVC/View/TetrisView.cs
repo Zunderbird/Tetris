@@ -51,7 +51,7 @@ namespace Assets.MVC.View
 
         public void DisplayBoard()
         {
-            _playersBoard = new GameObject("Player " + _model.PlayerName);
+            _playersBoard = new GameObject("Player");
             _playersBoard.transform.position = _boardsOffset;
 
             var board = UnityEngine.Object.Instantiate((GameObject)Resources.Load("Board"));
