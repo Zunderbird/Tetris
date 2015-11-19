@@ -47,7 +47,7 @@ namespace Assets.Scripts
 
             for (var i = 0; i < Configuration.PlayersCount; i++)
             {
-                _players[i] = new PlayerController(_inputKeys[0]);
+                _players[i] = new PlayerController(_inputKeys[i]);
                 _players[i].GameView.NewGame(GetPlayersBoardPosition(i));
             }
         }
