@@ -9,16 +9,13 @@ namespace Assets.MVC.Model
         public static SimpleJSON.JSONNode Colors { get; set; }
         private static readonly Random Rand = new Random();
 
-        static JsonReader()
-        { }
-
         public static bool LoadResources()
         {
-            var shapesFileContent = System.IO.File.ReadAllText("Assets/DataObjects/shapes.json");
-            Shapes = SimpleJSON.JSON.Parse(shapesFileContent);
+            var shapes = UnityEngine.Resources.Load("DataObjects/shapes");
+            Shapes = SimpleJSON.JSON.Parse(shapes.ToString());
 
-            var coloursFileContent = System.IO.File.ReadAllText("Assets/DataObjects/colors.json");
-            Colors = SimpleJSON.JSON.Parse(coloursFileContent);
+            var colors = UnityEngine.Resources.Load("DataObjects/colors");
+            Colors = SimpleJSON.JSON.Parse(colors.ToString());
 
             return true;
         }

@@ -45,7 +45,6 @@ namespace Assets.MVC.Model
             get { return _isOnPause; }
             set
             {
-                //UnityEngine.Debug.Log("Is on pause changed, was " + _isOnPause + ", now it's " + value);
                 _isOnPause = value;
                 if (_isOnPause == false) FinishMovement();
             }            
@@ -59,6 +58,7 @@ namespace Assets.MVC.Model
 
             _board = new Board(width, height);
 
+            JsonReader.LoadResources();
             _nextShape = GenerateNextShape();
             TryToAddShape();
 
@@ -111,7 +111,7 @@ namespace Assets.MVC.Model
         {
             _currentShape = _nextShape;
             _nextShape = GenerateNextShape();
-            _board.CurrentShapeCoord = new Point((_board.Width - _currentShape.Width) / 2, _board.Height - _currentShape.Height - 2);
+            _board.CurrentShapeCoord = new Point((_board.Width - _currentShape.Width) / 2, _board.Height - _currentShape.Height - 1);
             return _board.CheckShapeOffset(_currentShape, new Point(0, 0));
         }
 

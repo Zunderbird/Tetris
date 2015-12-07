@@ -43,7 +43,6 @@ namespace Assets.MVC.Controller
 
         public void DroppingShapeAnimationEnded()
         {
-            //UnityEngine.Debug.Log("Animation Ended");
             _model.AttachShape();
             _model.IsOnPause = false;
         }
