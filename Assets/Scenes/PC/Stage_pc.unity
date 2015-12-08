@@ -201,7 +201,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1249672460}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 89ea8945dd0bbd84dacb799428cedc0c, type: 3}
+  m_Script: {fileID: 11500000, guid: 6ca023f7c4fe8294882e3dc2934181f7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   BackgroundMusic: {fileID: 8292682, guid: dc7963040b574564480be40f148f469a, type: 2}

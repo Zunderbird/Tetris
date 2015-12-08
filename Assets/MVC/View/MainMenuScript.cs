@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-namespace Assets.MVC.View.Scripts
+namespace Assets.MVC.View
 {
     public abstract class MainMenuScript : MonoBehaviour
     {

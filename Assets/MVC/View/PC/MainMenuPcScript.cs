@@ -1,11 +1,10 @@
 ﻿using Assets.MVC.Model;
-using Assets.MVC.View.Scripts;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace Assets.MVC.View.PC
 {
-    class MainMenuPc: MainMenuScript
+    class MainMenuPcScript: MainMenuScript
     {
         public Button PlayerCountButton;
 

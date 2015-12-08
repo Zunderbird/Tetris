@@ -2,11 +2,11 @@
 using Assets.MVC.Model;
 using UnityEngine.UI;
 
-using InputKeys = System.Collections.Generic.Dictionary<string, string>;
+using InputKeys = System.Collections.Generic.Dictionary<string, System.Func<bool>>;
 
-namespace Assets.MVC.View.Scripts
-{
-    public class GameInitializerScript : MonoBehaviour
+namespace Assets.MVC.View.PC
+{   
+    public class GameInitializerPcScript : MonoBehaviour
     {
         public AudioSource BackgroundMusic;
         public Toggle MuteToggle;
@@ -16,22 +16,22 @@ namespace Assets.MVC.View.Scripts
         private readonly InputKeys[] _inputKeys = {
         new InputKeys
         {
-            { "Left", "Left_player1" },
-            { "Right", "Right_player1" },
-            { "Down", "Down_player1" },
-            { "Drop", "Drop_player1" },
-            { "RotateCW", "RotateCW_player1" },
-            { "RotateCCW", "RotateCCW_player1" }
-
+            { "Left", () => Input.GetButton("Left_player1") },
+            { "Right", () => Input.GetButton("Right_player1") },
+            { "Down", () => Input.GetButton("Down_player1") },
+            { "Drop", () => Input.GetButtonDown("Drop_player1") },
+            { "RotateCW", () => Input.GetButtonDown("RotateCW_player1") },
+            { "RotateCCW", () => Input.GetButtonDown("RotateCCW_player1") },
         },
         new InputKeys
         {
-            { "Left", "Left_player2" },
-            { "Right", "Right_player2" },
-            { "Down", "Down_player2" },
-            { "Drop", "Drop_player2" },
-            { "RotateCW", "RotateCW_player2" },
-            { "RotateCCW", "RotateCCW_player2" }
+            { "Left", () => Input.GetButton("Left_player2") },
+            { "Right", () => Input.GetButton("Right_player2") },
+            { "Down", () => Input.GetButton("Down_player2") },
+            { "Drop", () => Input.GetButtonDown("Drop_player2") },
+            { "RotateCW", () => Input.GetButtonDown("RotateCW_player2") },
+            { "RotateCCW", () => Input.GetButtonDown("RotateCCW_player2") }
+
         }
         };
 
@@ -48,7 +48,7 @@ namespace Assets.MVC.View.Scripts
 
             for (var i = 0; i < Configuration.PlayersCount; i++)
             {
-                _players[i] = new PlayerController(_inputKeys[i]);
+                _players[i] = new PlayerController(_inputKeys[i], "MainMenu_pc");
                 _players[i].GameView.NewGame(GetPlayersBoardPosition(i));
             }
         }

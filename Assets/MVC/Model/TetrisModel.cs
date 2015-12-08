@@ -133,7 +133,6 @@ namespace Assets.MVC.Model
             {
                 if (broadcastEvent)
                 {
-                    //UnityEngine.Debug.Log("simple moving down");
                     AttachShape();
                     FinishMovement();
                 }    
@@ -154,7 +153,6 @@ namespace Assets.MVC.Model
         public void AttachShape()
         {
             _collectedLine = _board.AttachShape(_currentShape);
-            //UnityEngine.Debug.Log("Attached, Collected lines: " + _collectedLine.Count);
         }
 
         public void RotateShape(RotateDirection rotateDirection)

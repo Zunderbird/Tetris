@@ -1,9 +1,8 @@
-﻿using Assets.MVC.View.Scripts;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Assets.MVC.View.Android
 {
-    class MainMenuAndroid: MainMenuScript
+    class MainMenuAndroidScript: MainMenuScript
     {
         protected override void NewGame()
         {
