@@ -1,5 +1,4 @@
-﻿using Assets.MVC.Model;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 namespace Assets.MVC.View.PC
@@ -9,8 +8,14 @@ namespace Assets.MVC.View.PC
         public Button PlayerCountButton;
 
         void Start()
-        {      
+        {
+            if (!PlayerPrefs.HasKey("MaxPlayersCount")) PlayerPrefs.SetInt("MaxPlayersCount", 2);
+            if (!PlayerPrefs.HasKey("PlayersCount")) PlayerPrefs.SetInt("PlayersCount", 1);
+
             PlayerCountButton.onClick.AddListener(ChangePlayersCount);
+            PlayerCountButton.transform.GetChild(0).GetComponent<Text>().text
+                    = PlayerPrefs.GetInt("PlayersCount") 
+                    + ((PlayerPrefs.GetInt("PlayersCount") == 1)? " Player": " Players");
         }
 
         protected override void NewGame()
@@ -20,15 +25,16 @@ namespace Assets.MVC.View.PC
 
         private void ChangePlayersCount()
         {
-            if (Configuration.PlayersCount >= Configuration.MAX_PLAYERS_COUNT)
+            if (PlayerPrefs.GetInt("PlayersCount") >= PlayerPrefs.GetInt("MaxPlayersCount"))
             {
-                Configuration.PlayersCount = 1;
-                PlayerCountButton.transform.GetChild(0).GetComponent<Text>().text = Configuration.PlayersCount + " Player";
+                PlayerPrefs.SetInt("PlayersCount", 1);
+                PlayerCountButton.transform.GetChild(0).GetComponent<Text>().text = "1 Player";
             }
             else
             {
-                Configuration.PlayersCount++;
-                PlayerCountButton.transform.GetChild(0).GetComponent<Text>().text = Configuration.PlayersCount + " Players";
+                PlayerPrefs.SetInt("PlayersCount", PlayerPrefs.GetInt("PlayersCount") +1);
+                PlayerCountButton.transform.GetChild(0).GetComponent<Text>().text 
+                    = PlayerPrefs.GetInt("PlayersCount") + " Players";
             }
         }
     }

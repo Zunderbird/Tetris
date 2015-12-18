@@ -24,7 +24,7 @@ namespace Assets.MVC.View
         {
             _inputKeys = inputKeys;
 
-            GameModel = new TetrisModel(Configuration.BoardWidth, Configuration.BoardHeight);
+            GameModel = new TetrisModel(PlayerPrefs.GetInt("BoardWidth"), PlayerPrefs.GetInt("BoardHeight"));
             GameController = new Controller.Controller(GameModel);
             GameView = new TetrisView(GameModel, GameController);
             GameModel.GameOver += (sender, args) => Application.LoadLevel(mainMenu);

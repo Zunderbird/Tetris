@@ -1,15 +1,11 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
 
 using InputKeys = System.Collections.Generic.Dictionary<string, System.Func<bool>>;
 
 namespace Assets.MVC.View.Android
 {   
-    public class GameInitializerAndroidScript : MonoBehaviour
+    public class GameInitializerAndroidScript : GameInitializerScript
     {
-        public AudioSource BackgroundMusic;
-        public Toggle MuteToggle;
-
         private PlayerController _player;
 
         private readonly InputKeys _inputKeys = 
@@ -25,13 +21,6 @@ namespace Assets.MVC.View.Android
 
         void Start()
         {
-            if (BackgroundMusic != null)
-            {
-                BackgroundMusic = Instantiate(BackgroundMusic);
-                BackgroundMusic.Play();
-            }
-            MuteToggle.onValueChanged.AddListener(isMute => BackgroundMusic.mute = isMute);
-
             _player = new PlayerController(_inputKeys, "MainMenu_android");
             _player.GameView.NewGame(Vector3.zero);
         }

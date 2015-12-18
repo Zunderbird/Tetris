@@ -1,16 +1,11 @@
 ﻿using UnityEngine;
-using Assets.MVC.Model;
-using UnityEngine.UI;
 
 using InputKeys = System.Collections.Generic.Dictionary<string, System.Func<bool>>;
 
 namespace Assets.MVC.View.PC
 {   
-    public class GameInitializerPcScript : MonoBehaviour
+    public class GameInitializerPcScript : GameInitializerScript
     {
-        public AudioSource BackgroundMusic;
-        public Toggle MuteToggle;
-
         private PlayerController[] _players;
 
         private readonly InputKeys[] _inputKeys = {
@@ -37,16 +32,9 @@ namespace Assets.MVC.View.PC
 
         void Start()
         {
-            if (BackgroundMusic != null)
-            {
-                BackgroundMusic = Instantiate(BackgroundMusic);
-                BackgroundMusic.Play();
-            }
-            MuteToggle.onValueChanged.AddListener(isMute => BackgroundMusic.mute = isMute);
+            _players = new PlayerController[PlayerPrefs.GetInt("PlayersCount")];
 
-            _players = new PlayerController[Configuration.PlayersCount];
-
-            for (var i = 0; i < Configuration.PlayersCount; i++)
+            for (var i = 0; i < PlayerPrefs.GetInt("PlayersCount"); i++)
             {
                 _players[i] = new PlayerController(_inputKeys[i], "MainMenu_pc");
                 _players[i].GameView.NewGame(GetPlayersBoardPosition(i));
@@ -56,13 +44,13 @@ namespace Assets.MVC.View.PC
         private static Vector3 GetPlayersBoardPosition(int index)
         {
             //TODO: New formula for getting x coordinate
-            var x = (index*10 - 5)*(Configuration.PlayersCount-1);
+            var x = (index*10 - 5)*(PlayerPrefs.GetInt("PlayersCount") - 1);
             return new Vector3(x, 0);
         }
 
         void Update()
         {
-            for (var i = 0; i < Configuration.PlayersCount; i++)
+            for (var i = 0; i < PlayerPrefs.GetInt("PlayersCount"); i++)
             {
                 _players[i].HandleEvents();
             }
@@ -71,7 +59,7 @@ namespace Assets.MVC.View.PC
         void OnGUI()
         {
             //TODO: View Score and Level as child of Players boards
-            for (var i = 0; i < Configuration.PlayersCount; i++)
+            for (var i = 0; i < PlayerPrefs.GetInt("PlayersCount"); i++)
             {               
                 GUI.Label(new Rect(250 + i*400, 50, 100, 50), "Score: " + _players[i].GameModel.Score);
                 GUI.Label(new Rect(400 + i*400, 50, 100, 50), "Level:  " + _players[i].GameModel.Level);
