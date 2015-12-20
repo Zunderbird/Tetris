@@ -5,6 +5,8 @@ namespace Assets.MVC.View
 {
     public static class TouchControls
     {
+        public static bool IsInRotationPhase;
+
         public static bool DoubleTouch()
         {
             return Input.touchCount == 2;
@@ -28,21 +30,33 @@ namespace Assets.MVC.View
                 && Math.Abs(touch.deltaPosition.x) > Math.Abs(touch.deltaPosition.y);
         }
 
-        public static bool UpwardShipt()
+        public static bool Rotate()
         {
             if (Input.touchCount != 1) return false;
 
             var touch = Input.GetTouch(0);
-            return Input.touchCount == 1
-                && touch.deltaPosition.y > 0
-                && Math.Abs(touch.deltaPosition.x) < Math.Abs(touch.deltaPosition.y);
+
+            if (touch.phase == TouchPhase.Began) IsInRotationPhase = true;
+            if (touch.phase == TouchPhase.Ended) IsInRotationPhase = false;
+
+            if (touch.deltaPosition.y > 0
+                && Math.Abs(touch.deltaPosition.x) < Math.Abs(touch.deltaPosition.y)
+                && IsInRotationPhase)
+            {
+                IsInRotationPhase = false;
+                return true;
+            }
+            return false;
         }
 
         public static bool DownwardShift()
         {
+            if (Input.touchCount != 1) return false;
+
+            var touch = Input.GetTouch(0);
             return Input.touchCount == 1 
-                && Input.GetTouch(0).deltaPosition.y < 0
-                && Math.Abs(Input.GetTouch(0).deltaPosition.x) < Math.Abs(Input.GetTouch(0).deltaPosition.y);
+                && touch.deltaPosition.y < 0
+                && Math.Abs(touch.deltaPosition.x) < Math.Abs(touch.deltaPosition.y);
         }
     }
 }

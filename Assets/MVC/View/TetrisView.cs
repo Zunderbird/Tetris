@@ -58,13 +58,14 @@ namespace Assets.MVC.View
 
         public void RotateShape(TetrisShape shape)
         {
-            Vector2 currentShapePosition = _currentShape.transform.position;
-
-            UnityEngine.Object.Destroy(_currentShape);
-
-            _currentShape = ShapeFactory.CreateShape(shape);
-            _currentShape.transform.position = currentShapePosition;
-            _currentShape.transform.SetParent(_playersBoard.transform);
+            var i = 0;
+            foreach (Transform block in _currentShape.transform)
+            {
+                block.localPosition = new Vector3(
+                    shape.Blocks[i].X, 
+                    shape.Blocks[i++].Y) 
+                    * ShapeFactory.BLOCK_SIZE;
+            }
         }
 
         private void DestroyLine(int number)

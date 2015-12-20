@@ -15,7 +15,7 @@ namespace Assets.MVC.View.Android
             { "Right", TouchControls.RightShift },
             { "Down", TouchControls.DownwardShift },
             { "Drop", TouchControls.DoubleTouch },
-            { "RotateCW", TouchControls.UpwardShipt },
+            { "RotateCW", TouchControls.Rotate },
             { "RotateCCW", () => false }
         };
 
