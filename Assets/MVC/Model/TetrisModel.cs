@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Assets.MVC.Model
 {
@@ -10,12 +11,11 @@ namespace Assets.MVC.Model
         private TetrisShape _currentShape;
         private TetrisShape _nextShape;
 
-        private List<int> _collectedLine;
-        private bool _isOnPause;
-
         public int Level { get; set; } 
         public int Score { get; private set; }
         public int CollectedCount { get; private set; }
+
+        public bool IsOnPause { get; set; }
 
         public const int COLLECT_TO_NEXT_LEVEL = 4;
 
@@ -26,7 +26,7 @@ namespace Assets.MVC.Model
         public event DroppingEvent ShapeDropping;
 
         public delegate void DestroyingEvent(object sender, LineIndexEventArgs e);
-        public event DestroyingEvent LineDestroyed;
+        public event DestroyingEvent LinesDestroyed;
 
         public event EventHandler RotateDone;
         public event EventHandler ShapeAdded;
@@ -40,16 +40,6 @@ namespace Assets.MVC.Model
                 { MoveDirection.Down, new Point(0, -1) },
             };
 
-        public bool IsOnPause
-        {
-            get { return _isOnPause; }
-            set
-            {
-                _isOnPause = value;
-                if (_isOnPause == false) FinishMovement();
-            }            
-        }
-
         public TetrisModel(int width, int height)
         {
             Score = 0;
@@ -60,9 +50,7 @@ namespace Assets.MVC.Model
 
             JsonReader.LoadResources();
             _nextShape = GenerateNextShape();
-            TryToAddShape();
-
-            _collectedLine = new List<int>();
+            TryToAddShape(); 
         }
 
         public int BoardWidth
@@ -111,48 +99,47 @@ namespace Assets.MVC.Model
         {
             _currentShape = _nextShape;
             _nextShape = GenerateNextShape();
-            _board.CurrentShapeCoord = new Point((_board.Width - _currentShape.Width) / 2, _board.Height - _currentShape.Height - 1);
+
+            _board.CurrentShapeCoord = new Point((
+                _board.Width - _currentShape.Width) / 2, 
+                _board.Height - _currentShape.Height - 1);
+
             return _board.CheckShapeOffset(_currentShape, new Point(0, 0));
+        }
+
+        public void CheckMovement(MoveDirection moveDirection)
+        {
+            if (MoveShape(moveDirection, true) ||
+                moveDirection != MoveDirection.Down)
+                return;
+
+            if (!CheckCollectedLines()) FinishMovement();
         }
 
         public bool MoveShape(MoveDirection moveDirection, bool broadcastEvent)
         {
-            if (_isOnPause) return false;
             var offset = _offsets[moveDirection];
 
-            if (_board.CheckShapeOffset(_currentShape, offset))
-            {
-                _board.CurrentShapeCoord += offset;
+            if (!_board.CheckShapeOffset(_currentShape, offset)) return false;
+            
+            _board.CurrentShapeCoord += offset;
 
-                if (broadcastEvent && MovementDone != null)
-                    MovementDone(this, new MovementEventArgs(offset));
+            if (broadcastEvent && MovementDone != null)
+                MovementDone(this, new MovementEventArgs(offset));
 
-                return true;
-            }
-            if (moveDirection == MoveDirection.Down)
-            {
-                if (broadcastEvent)
-                {
-                    AttachShape();
-                    FinishMovement();
-                }    
-            }
-            return false;
+            return true;
         }
 
         public void DropShape()
         {
+            IsOnPause = true;
+
             var counter = 0; 
             while (MoveShape(MoveDirection.Down, false))
             {
                 counter++;
             }          
             if (ShapeDropping != null) ShapeDropping(this, new DroppingEventArgs(counter));
-        }
-
-        public void AttachShape()
-        {
-            _collectedLine = _board.AttachShape(_currentShape);
         }
 
         public void RotateShape(RotateDirection rotateDirection)
@@ -166,41 +153,40 @@ namespace Assets.MVC.Model
             }
         }
 
+        public bool CheckCollectedLines()
+        {
+            var collectedLine = _board.AttachShape(_currentShape);
+
+            if (collectedLine.Count == 0) return false;
+
+            IsOnPause = true;
+
+            var recountedCollectedLine = collectedLine.Select((lineNumber, index) => lineNumber - index).ToList();
+            _board.DestroyLines(recountedCollectedLine);
+
+            if (LinesDestroyed != null)
+                LinesDestroyed(this, new LineIndexEventArgs(recountedCollectedLine));
+
+            GaineScorePoints(collectedLine.Count);
+
+            return true;
+        }
+
         public void FinishMovement()
-        {         
-            if (_collectedLine.Count == 0)
+        {
+            if (TryToAddShape())
             {
-                if (TryToAddShape())
-                {
-                    if (ShapeAdded != null) ShapeAdded(this, EventArgs.Empty);
-                }
-                else if (GameOver != null) GameOver(this, EventArgs.Empty);
+                if (ShapeAdded != null) ShapeAdded(this, EventArgs.Empty);
             }
-            else
-            {
-                DestroyFirstCollectedLine();
-            }
+            else if (GameOver != null) GameOver(this, EventArgs.Empty);
+
+            IsOnPause = false;
         }
 
-        public bool DestroyFirstCollectedLine()
+        private void GaineScorePoints(int collectedCount)
         {
-            if (_collectedLine.Count == 0) return true;
-
-            var lineIndex = _collectedLine[_collectedLine.Count - 1];                     
-            if (LineDestroyed != null) LineDestroyed(this, new LineIndexEventArgs(lineIndex));
-
-            GaineScorePoints();
-
-            _board.DestroyLine(lineIndex);
-            _collectedLine.RemoveAt(_collectedLine.Count - 1);
-
-            return (_collectedLine.Count == 0);
-        }
-
-        private void GaineScorePoints()
-        {
-            Score += Level;
-            CollectedCount += 1;
+            Score += Level * collectedCount;
+            CollectedCount += collectedCount;
 
             if (CollectedCount % COLLECT_TO_NEXT_LEVEL == 0) LevelUp();
         }

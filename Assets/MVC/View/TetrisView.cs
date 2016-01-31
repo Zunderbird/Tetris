@@ -28,7 +28,7 @@ namespace Assets.MVC.View
             _model.MovementDone += OnMovementDone;
             _model.RotateDone += OnRotateDone;
             _model.ShapeAdded += OnShapeAdded;
-            _model.LineDestroyed += OnLineDestroyed;
+            _model.LinesDestroyed += OnLinesDestroyed;
             _model.GameOver += OnGameOver;
             _model.ShapeDropping += OnShapeDropping;
             _model.ShapeIsAttachedAddListener(OnShapeIsAttached);
@@ -49,10 +49,12 @@ namespace Assets.MVC.View
         public void SpawnShape(TetrisShape shape, Point spawnCoord)
         {
             _currentShape = ShapeFactory.CreateShape(shape);
+
             _currentShape.transform.position = new Vector2(
             (spawnCoord.X - (float)(_model.BoardWidth - 1) / 2),
             spawnCoord.Y - (float)_model.BoardHeight/2 + 1)
             *ShapeFactory.BLOCK_SIZE;
+
             _currentShape.transform.SetParent(_playersBoard.transform, false);
         }
 
@@ -76,12 +78,11 @@ namespace Assets.MVC.View
             }
         }
 
-        private void DropBlocks(int startBlockIndex)
+        private void DropBlocks(int lineIndex, Action action)
         {
             _animationObjects = new List<Transform>();
-            _controller.DroppingBlocksAnimationStart();
 
-            for (var i = startBlockIndex + 1; i < _model.BoardHeight; i++)
+            for (var i = lineIndex + 1; i < _model.BoardHeight; i++)
             {
                 while (_lines[i].transform.childCount > 0)
                 {
@@ -90,15 +91,17 @@ namespace Assets.MVC.View
 
                     _animationObjects.Add(block);
 
-                    block.DOMoveY(block.transform.position.y - ShapeFactory.BLOCK_SIZE, 0.25f)
-                        .OnComplete(() => AnimationCompleted(block));
+                    block.DOMoveY(block.transform.position.y - ShapeFactory.BLOCK_SIZE, 0.75f)
+                        .OnComplete(() => AnimationCompleted(block, action));
                 }
             }
+
+            if (_animationObjects.Count == 0) action();
         }
 
-        private void AnimationCompleted(UnityEngine.Object animatedObject)
+        private void AnimationCompleted(UnityEngine.Object animatedObject, Action action)
         {
-            if (_animationObjects.Last() == animatedObject) _controller.DroppingBlocksAnimationEnded();
+            if (_animationObjects.Last() == animatedObject) action();
         }
 
         public void DisplayNextShape(TetrisShape shape)
@@ -139,10 +142,22 @@ namespace Assets.MVC.View
             UnityEngine.Object.Destroy(_currentShape);
         }
 
-        private void OnLineDestroyed(object sender, LineIndexEventArgs e)
+        private void AnimateDestroyingLines(IEnumerator<int> enumerator)
         {
-            DestroyLine(e.LineIndex);
-            DropBlocks(e.LineIndex);
+            if (enumerator.MoveNext())
+            {
+                DestroyLine(enumerator.Current);
+                DropBlocks(enumerator.Current, () => AnimateDestroyingLines(enumerator));
+            }
+            else
+            {              
+                _controller.DroppingBlocksAnimationEnded();
+            }
+        }
+
+        private void OnLinesDestroyed(object sender, LineIndexEventArgs e)
+        {
+            AnimateDestroyingLines(e.LineIndexes.GetEnumerator());
         }
 
         private void OnGameOver(object sender, EventArgs e)
@@ -152,7 +167,6 @@ namespace Assets.MVC.View
 
         private void OnShapeDropping(object sender, DroppingEventArgs e)
         {
-            _controller.DroppingShapeAnimationStart();
             _currentShape.transform.DOMoveY(_currentShape.transform.position.y - ShapeFactory.BLOCK_SIZE*e.Distance, 0.2f)
                 .OnComplete(_controller.DroppingShapeAnimationEnded);
         }

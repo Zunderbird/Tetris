@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Assets.MVC.Model
 {
@@ -36,11 +37,11 @@ namespace Assets.MVC.Model
 
     public class LineIndexEventArgs : EventArgs
     {
-        public int LineIndex;
+        public IEnumerable<int> LineIndexes;
 
-        public LineIndexEventArgs(int lineIndex)
+        public LineIndexEventArgs(IEnumerable<int> lineIndex)
         {
-            LineIndex = lineIndex;
+            LineIndexes = new List<int>(lineIndex);
         }
     }
 }

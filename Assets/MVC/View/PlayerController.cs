@@ -13,9 +13,7 @@ namespace Assets.MVC.View
         private const float TIME_BETWEEN_FALLS = 0.4f;
         private const float HORIZONTAL_SPEED = 0.03f;
 
-        private float _currentTimeBetweenFalls;
-
-        private float _verticalTimeCounter;
+        private float _verticalTimeCounter = TIME_BETWEEN_FALLS;
         private float _horizontalTimeCounter;
 
         private readonly InputKeys _inputKeys; 
@@ -51,11 +49,10 @@ namespace Assets.MVC.View
 
             if (_verticalTimeCounter < 0)
             {
-                _verticalTimeCounter = _currentTimeBetweenFalls / GameModel.Level;
+                _verticalTimeCounter = TIME_BETWEEN_FALLS / GameModel.Level;
                 GameController.MoveTrigger(MoveDirection.Down);
             }
             _verticalTimeCounter -= Time.deltaTime * TIME_BETWEEN_FALLS;
-            _currentTimeBetweenFalls = TIME_BETWEEN_FALLS;
         }
     }
 

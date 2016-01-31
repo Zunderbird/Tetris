@@ -13,38 +13,27 @@ namespace Assets.MVC.Controller
 
         public void RotateTrigger (RotateDirection rotateDirection)
         {
-            _model.RotateShape(rotateDirection);
+            if (!_model.IsOnPause) _model.RotateShape(rotateDirection);
         }
 
         public void MoveTrigger(MoveDirection direction)
         {
-            _model.MoveShape(direction, true);
+            if (!_model.IsOnPause) _model.CheckMovement(direction);
         }
 
         public void DropTrigger()
         {
-            _model.DropShape();
-        }
-
-        public void DroppingBlocksAnimationStart()
-        {
-            _model.IsOnPause = true;
+            if (!_model.IsOnPause) _model.DropShape();
         }
 
         public void DroppingBlocksAnimationEnded()
         {
-            _model.IsOnPause = false;
-        }
-
-        public void DroppingShapeAnimationStart()
-        {
-            _model.IsOnPause = true;
+            _model.FinishMovement();
         }
 
         public void DroppingShapeAnimationEnded()
         {
-            _model.AttachShape();
-            _model.IsOnPause = false;
+            if (!_model.CheckCollectedLines()) _model.FinishMovement();
         }
 
     }

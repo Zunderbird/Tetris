@@ -62,6 +62,7 @@ namespace Assets.MVC.Model
                 .ToList();
 
             collectedLine.Sort();
+
             if (ShapeIsAttached != null) ShapeIsAttached(this, EventArgs.Empty);
             return collectedLine;
         }
@@ -75,13 +76,16 @@ namespace Assets.MVC.Model
                               this[coord] != 0);
         }
 
-        public void DestroyLine(int lineIndex)
+        public void DestroyLines(List<int> lineIndexes)
         {
-            _tetrisLines.RemoveAt(lineIndex);
-            _tetrisLines.Add(new int[Width]);
+            foreach (var currentLine in lineIndexes)
+            {
+                _tetrisLines.RemoveAt(currentLine);
+                _tetrisLines.Add(new int[Width]);
 
-            _linesCount.RemoveAt(lineIndex);
-            _linesCount.Add(0);
+                _linesCount.RemoveAt(currentLine);
+                _linesCount.Add(0);
+            }
         }
     }
 }
