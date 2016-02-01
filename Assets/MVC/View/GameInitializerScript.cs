@@ -20,8 +20,8 @@ namespace Assets.MVC.View
             if (!PlayerPrefs.HasKey("IsMute")) PlayerPrefs.SetString("IsMute", "false");
             //if (!PlayerPrefs.HasKey("BoardWidth")) PlayerPrefs.SetInt("BoardWidth", 10);
             //if (!PlayerPrefs.HasKey("BoardHeight")) PlayerPrefs.SetInt("BoardHeight", 24);
-            PlayerPrefs.SetInt("BoardWidth", 4);
-            PlayerPrefs.SetInt("BoardHeight", 12);
+            PlayerPrefs.SetInt("BoardWidth", 10);
+            PlayerPrefs.SetInt("BoardHeight", 24);
         }
 
         private void SetMusic()

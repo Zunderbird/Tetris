@@ -1,11 +1,15 @@
 ﻿using UnityEngine;
-
+using UnityEngine.UI;
 using InputKeys = System.Collections.Generic.Dictionary<string, System.Func<bool>>;
 
 namespace Assets.MVC.View.Android
 {   
     public class GameInitializerAndroidScript : GameInitializerScript
     {
+        public Canvas GameCanvas;
+        public Text LevelText;
+        public Text ScoreText;
+
         private PlayerController _player;
 
         private readonly InputKeys _inputKeys = 
@@ -22,7 +26,7 @@ namespace Assets.MVC.View.Android
         void Start()
         {
             _player = new PlayerController(_inputKeys, "MainMenu_android");
-            _player.GameView.NewGame(Vector3.zero);
+            _player.GameView.NewGame(GameCanvas);
         }
 
         void Update()
@@ -32,9 +36,8 @@ namespace Assets.MVC.View.Android
 
         void OnGUI()
         {
-            //TODO: View Score and Level as child of Players boards
-            GUI.Label(new Rect(5, 2, 100, 50), "Score:\n  " + _player.GameModel.Score);
-            GUI.Label(new Rect(105, 2, 100, 50), "Level:\n  " + _player.GameModel.Level);
+            LevelText.text = "Level: " + _player.GameModel.Level;
+            ScoreText.text = "Score: " + _player.GameModel.Score;
         }
     }
 

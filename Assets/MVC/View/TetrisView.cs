@@ -46,6 +46,12 @@ namespace Assets.MVC.View
             SpawnShape(_model.CurrentShape, _model.CurrentShapeCoord);
         }
 
+        public void NewGame(Canvas gameCanvas)
+        {
+            NewGame(new Vector3(0f, 0f));
+            _playersBoard.transform.SetParent(gameCanvas.transform, false);
+        }
+
         public void SpawnShape(TetrisShape shape, Point spawnCoord)
         {
             _currentShape = ShapeFactory.CreateShape(shape);
@@ -91,7 +97,7 @@ namespace Assets.MVC.View
 
                     _animationObjects.Add(block);
 
-                    block.DOMoveY(block.transform.position.y - ShapeFactory.BLOCK_SIZE, 0.75f)
+                    block.DOMoveY(block.transform.position.y - ShapeFactory.BLOCK_SIZE, 0.35f)
                         .OnComplete(() => AnimationCompleted(block, action));
                 }
             }
