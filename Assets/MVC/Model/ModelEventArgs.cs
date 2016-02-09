@@ -44,6 +44,20 @@ namespace Assets.MVC.Model
             LineIndexes = new List<int>(lineIndex);
         }
     }
+
+    public class GameOverEventArgs : EventArgs
+    {
+        public int CollectedLinesCount { get; set; }
+        public int Score { get; set; }
+        public int Level { get; set; }
+
+        public GameOverEventArgs(int collectedLinesCount, int score, int level)
+        {
+            CollectedLinesCount = collectedLinesCount;
+            Score = score;
+            Level = level;
+        }
+    }
 }
 
 

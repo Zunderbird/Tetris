@@ -9,33 +9,32 @@ namespace Assets.MVC.View
         public Button SettingsButton;
         public Button LeaderboardsButton;
         public Button ExitButton;       
-        public Button BackButton;
+
+        public Canvas SettingsCanvas;
+        public Canvas LeaderboardsCanvas;
+
+        protected abstract void NewGame();
 
         new void Awake()
         {
             base.Awake();
+
             NewGameButton.onClick.AddListener(NewGame);
-            SettingsButton.onClick.AddListener(SettingsMode);
-            BackButton.onClick.AddListener(MainMenuMode);        
-
+            SettingsButton.onClick.AddListener(SettingsMode);   
+            LeaderboardsButton.onClick.AddListener(LeaderboardsMode);  
             ExitButton.onClick.AddListener(Application.Quit);
-            //TODO: Leaderboards Button event
         }
-
-        protected abstract void NewGame();
 
         private void SettingsMode()
         {
-            SettingsButton.transform.parent.gameObject.SetActive(false);
-            BackButton.transform.parent.gameObject.SetActive(true);
+            transform.gameObject.SetActive(false);
+            SettingsCanvas.gameObject.SetActive(true);
         }
 
-        private void MainMenuMode()
+        private void LeaderboardsMode()
         {
-            BackButton.transform.parent.gameObject.SetActive(false);
-            SettingsButton.transform.parent.gameObject.SetActive(true);  
+            transform.gameObject.SetActive(false);
+            LeaderboardsCanvas.gameObject.SetActive(true);
         }
-
-        
     }
 }

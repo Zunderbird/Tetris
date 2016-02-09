@@ -13,7 +13,7 @@ namespace Assets.MVC.Model
 
         public int Level { get; set; } 
         public int Score { get; private set; }
-        public int CollectedCount { get; private set; }
+        public int CollectedLinesCount { get; private set; }
 
         public bool IsOnPause { get; set; }
 
@@ -28,10 +28,12 @@ namespace Assets.MVC.Model
         public delegate void DestroyingEvent(object sender, LineIndexEventArgs e);
         public event DestroyingEvent LinesDestroyed;
 
+        public delegate void GameOverEvent(object sender, GameOverEventArgs e);
+        public event GameOverEvent GameOver;
+
         public event EventHandler RotateDone;
         public event EventHandler ShapeAdded;
-        public event EventHandler GameOver;
-
+        
         private readonly Dictionary<MoveDirection, Point> _offsets = new Dictionary<MoveDirection, Point>
             {
                 { MoveDirection.Right, new Point(1, 0) },
@@ -43,7 +45,7 @@ namespace Assets.MVC.Model
         public TetrisModel(int width, int height)
         {
             Score = 0;
-            CollectedCount = 0;
+            CollectedLinesCount = 0;
             Level = 1;
 
             _board = new Board(width, height);
@@ -155,19 +157,19 @@ namespace Assets.MVC.Model
 
         public bool CheckCollectedLines()
         {
-            var collectedLine = _board.AttachShape(_currentShape);
+            var collectedLines = _board.AttachShape(_currentShape);
 
-            if (collectedLine.Count == 0) return false;
+            if (collectedLines.Count == 0) return false;
 
             IsOnPause = true;
 
-            var recountedCollectedLine = collectedLine.Select((lineNumber, index) => lineNumber - index).ToList();
+            var recountedCollectedLine = collectedLines.Select((lineNumber, index) => lineNumber - index).ToList();
             _board.DestroyLines(recountedCollectedLine);
 
             if (LinesDestroyed != null)
                 LinesDestroyed(this, new LineIndexEventArgs(recountedCollectedLine));
 
-            GaineScorePoints(collectedLine.Count);
+            GaineScorePoints(collectedLines.Count);
 
             return true;
         }
@@ -178,7 +180,7 @@ namespace Assets.MVC.Model
             {
                 if (ShapeAdded != null) ShapeAdded(this, EventArgs.Empty);
             }
-            else if (GameOver != null) GameOver(this, EventArgs.Empty);
+            else if (GameOver != null) GameOver(this, new GameOverEventArgs(CollectedLinesCount, Score, Level));
 
             IsOnPause = false;
         }
@@ -186,9 +188,9 @@ namespace Assets.MVC.Model
         private void GaineScorePoints(int collectedCount)
         {
             Score += Level * collectedCount;
-            CollectedCount += collectedCount;
+            CollectedLinesCount += collectedCount;
 
-            if (CollectedCount % COLLECT_TO_NEXT_LEVEL == 0) LevelUp();
+            if (CollectedLinesCount % COLLECT_TO_NEXT_LEVEL == 0) LevelUp();
         }
 
         private void LevelUp()

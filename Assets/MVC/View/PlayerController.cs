@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using Assets.MVC.Model;
 using InputKeys = System.Collections.Generic.Dictionary<string, System.Func<bool>>;
 
@@ -18,14 +19,14 @@ namespace Assets.MVC.View
 
         private readonly InputKeys _inputKeys; 
 
-        public PlayerController(InputKeys inputKeys, string mainMenu)
+        public PlayerController(InputKeys inputKeys, Action <int, int, int> gameOverAction)
         {
             _inputKeys = inputKeys;
 
             GameModel = new TetrisModel(PlayerPrefs.GetInt("BoardWidth"), PlayerPrefs.GetInt("BoardHeight"));
             GameController = new Controller.Controller(GameModel);
             GameView = new TetrisView(GameModel, GameController);
-            GameModel.GameOver += (sender, args) => Application.LoadLevel(mainMenu);
+            GameModel.GameOver += (sender, args) => gameOverAction(args.CollectedLinesCount, args.Score, args.Level);
         }
 
         public void HandleEvents()
@@ -49,7 +50,7 @@ namespace Assets.MVC.View
 
             if (_verticalTimeCounter < 0)
             {
-                _verticalTimeCounter = TIME_BETWEEN_FALLS / GameModel.Level;
+                _verticalTimeCounter = TIME_BETWEEN_FALLS/ GameModel.Level;
                 GameController.MoveTrigger(MoveDirection.Down);
             }
             _verticalTimeCounter -= Time.deltaTime * TIME_BETWEEN_FALLS;

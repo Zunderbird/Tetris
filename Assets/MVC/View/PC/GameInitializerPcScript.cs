@@ -36,7 +36,9 @@ namespace Assets.MVC.View.PC
 
             for (var i = 0; i < PlayerPrefs.GetInt("PlayersCount"); i++)
             {
-                _players[i] = new PlayerController(_inputKeys[i], "MainMenu_pc");
+                _players[i] = new PlayerController(_inputKeys[i], 
+                    ((collectedLinesCount, score, level) => Application.LoadLevel("MainMenu_pc")));
+
                 _players[i].GameView.NewGame(GetPlayersBoardPosition(i));
             }
         }
